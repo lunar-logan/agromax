@@ -65,9 +65,9 @@ public class ResourceManager {
         String uri = theUri.toString();
 
         BasicDBObject query = new BasicDBObject("uri", uri);
-        DBObject result = cache.findOne(query);
+        String content = null;
         try {
-            String content;
+            DBObject result = (cache != null) ? cache.findOne(query) : null;
             if (result == null || cacheRefresh) {
                 Document soup = Jsoup.connect(uri).get();
                 content = soup.body().text();
@@ -75,18 +75,25 @@ public class ResourceManager {
                 BasicDBObject doc = new BasicDBObject("uri", uri).append("content", content);
                 WriteResult writeResult = null;
 
-                if (result == null) writeResult = cache.insert(doc);
-                else if (cacheRefresh) writeResult = cache.update(result, doc);
+                if (result == null && cache != null) writeResult = cache.insert(doc);
+                else if (cacheRefresh && cache != null) writeResult = cache.update(result, doc);
                 System.out.println("Trying to add: " + doc);
                 System.out.println("Result: " + writeResult);
 
-                return content;
+            } else { // Its probably a cache hit
+                System.out.println("Cache hit: " + result);
+                content = (String) result.get("content");
             }
-        } catch (IOException e) {
+        } catch (IOException | MongoTimeoutException e) {
             e.printStackTrace();
+            try {
+                Document soup = Jsoup.connect(uri).get();
+                content = soup.body().text();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
         }
-        System.out.println("Cache hit: " + result);
-        return (String) result.get("content");
+        return content;
     }
 
     private String retrieveLocal(URI theUri) {
@@ -109,11 +116,9 @@ public class ResourceManager {
     }
 /*
     public static void main(String[] args) throws URISyntaxException {
-//        ResourceManager rm = ResourceManager.getInstance();
-//        System.out.println(System.getProperty("user.dir"));
-//        System.out.println(rm.get(Paths.get(System.getProperty("user.dir") + "\\.gitignore").toUri()));
-//        System.out.println(rm.get("http://iitk.ac.in/doaa"));
-//        System.out.println(rm.get(System.getProperty("user.dir") + "\\.gitignore"));
+        ResourceManager rm = ResourceManager.getInstance();
+        System.out.println(rm.get("http://iitk.ac.in/doaa"));
+        System.out.println(rm.get(System.getProperty("user.dir") + "\\.gitignore"));
     }
-    */
+*/
 }
