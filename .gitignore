@@ -1,4 +1,5 @@
 # Ignore these files for versioning 
 
 /.idea
+/out
 AgroMax.iml

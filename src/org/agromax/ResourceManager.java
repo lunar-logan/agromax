@@ -1,8 +1,11 @@
 package org.agromax;
 
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+
 import java.io.*;
 import java.net.URI;
-import java.net.URISyntaxException;
+import java.nio.file.Paths;
 
 /**
  * @author Riddler
@@ -12,6 +15,8 @@ public class ResourceManager {
 
     private boolean cacheRefresh = false;
 
+    private static final int BUFFER_SIZE = 1024; // In bytes
+
     public static ResourceManager getInstance() {
         return ourInstance;
     }
@@ -19,39 +24,38 @@ public class ResourceManager {
     private ResourceManager() {
     }
 
-    public StringBuffer get(String uri) {
-        StringBuffer buffer = null;
-        try {
-            URI theUri = new URI(uri);
-            if (theUri.getScheme().equalsIgnoreCase("file"))
-                buffer = retrieveLocal(theUri);
-            else
-                buffer = retrieveRemote(theUri);
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+    public String get(URI theUri) {
+        String buffer = null;
+        if (theUri.getScheme().equalsIgnoreCase("file"))
+            buffer = retrieveLocal(theUri);
+        else
+            buffer = retrieveRemote(theUri);
         return buffer;
     }
 
-    private StringBuffer retrieveRemote(URI theUri) {
-        return new StringBuffer();
+    private String retrieveRemote(URI theUri) {
+        try {
+            Document soup = Jsoup.connect(theUri.toString()).get();
+            return soup.body().text();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
-    private StringBuffer retrieveLocal(URI theUri) {
+    private String retrieveLocal(URI theUri) {
         File file = new File(theUri);
         try {
             Reader reader = new InputStreamReader(new FileInputStream(file));
-            StringBuffer builder = new StringBuffer();
-            char[] buffer = new char[1024];
+            StringBuilder builder = new StringBuilder();
+            char[] buffer = new char[BUFFER_SIZE];
             while (true) {
                 int readCount = reader.read(buffer);
                 if (readCount < 0) break;
                 builder.append(buffer, 0, readCount);
             }
             reader.close();
-            return builder;
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            return builder.toString();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -60,6 +64,8 @@ public class ResourceManager {
 
     public static void main(String[] args) {
         ResourceManager rm = ResourceManager.getInstance();
-        rm.get("file:///E:/google.co.in");
+        System.out.println(System.getProperty("user.dir"));
+        System.out.println(rm.get(Paths.get(System.getProperty("user.dir") + "\\.gitignore").toUri()));
+        System.out.println(rm.get(URI.create("http://iitk.ac.in")));
     }
 }
