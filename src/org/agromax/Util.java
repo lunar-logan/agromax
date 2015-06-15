@@ -10,6 +10,10 @@ import java.util.logging.Logger;
 public class Util {
     private static final Logger LOGGER = Logger.getLogger("AgroMaxLogger");
 
+    public static final String SP_MODEL_PATH = "E:\\Coding\\Java Related\\stanford-parser\\stanford-parser-full-2015-04-20\\edu\\stanford\\nlp\\models\\parser\\nndep\\english_UD.gz";
+
+    public static final String SP_TAGGER_PATH = "E:\\Coding\\Java Related\\stanford-parser\\stanford-parser-full-2015-04-20\\edu\\stanford\\nlp\\models\\pos-tagger\\english-left3words\\english-left3words-distsim.tagger";
+
     public static final class StringWelder {
 
         private final String prefix;

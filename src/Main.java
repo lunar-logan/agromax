@@ -1,18 +1,16 @@
-import com.hp.hpl.jena.rdf.model.Model;
-import com.hp.hpl.jena.rdf.model.ModelFactory;
-import com.hp.hpl.jena.rdf.model.Property;
-import com.hp.hpl.jena.rdf.model.Resource;
+import org.agromax.AgroMax;
+import org.agromax.ResourceManager;
 
-import java.util.logging.Logger;
+import java.net.URISyntaxException;
 
 /**
  * @author Anurag Gautam
  */
 public class Main {
-    static Logger logger = Logger.getLogger("AgromaxLogger");
+//    static Logger logger = Logger.getLogger("AgromaxLogger");
 
-    public static void main(String[] args) {
-
+    public static void main(String[] args) throws URISyntaxException {
+/*
         logger.info("Creating a default model, using ModelFactory");
         Model model = ModelFactory.createDefaultModel();
 
@@ -28,7 +26,9 @@ public class Main {
 
         logger.info("Writing model in RDF on the stdout");
         model.write(System.out);
+*/
 
-
+        ResourceManager rm = ResourceManager.getInstance();
+        AgroMax.getTriples(rm.get("http://home.iitk.ac.in/~ganurag/cs365/projects/"));
     }
 }
