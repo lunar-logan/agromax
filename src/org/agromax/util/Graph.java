@@ -74,6 +74,15 @@ public class Graph {
         });
         return out.toString();
     }
+
+    public String getMemorySize() {
+        double bytes = 0L;
+        for (String a : graph.keySet()) {
+            bytes += graph.get(a).size() * 200;
+        }
+        bytes /= 1000000;
+        return String.format("%f MB", bytes);
+    }
 /*
     public static void main(String[] args) {
         Graph g = new Graph();

@@ -1,4 +1,4 @@
-package org.agromax;
+package org.agromax.util;
 
 import java.util.logging.Logger;
 
@@ -13,6 +13,8 @@ public class Util {
     public static final String SP_MODEL_PATH = "E:\\Coding\\Java Related\\stanford-parser\\stanford-parser-full-2015-04-20\\edu\\stanford\\nlp\\models\\parser\\nndep\\english_UD.gz";
 
     public static final String SP_TAGGER_PATH = "E:\\Coding\\Java Related\\stanford-parser\\stanford-parser-full-2015-04-20\\edu\\stanford\\nlp\\models\\pos-tagger\\english-left3words\\english-left3words-distsim.tagger";
+
+    public static final String VOCAB_DIR = System.getProperty("user.dir") + "/data/vocab";
 
     public static final class StringWelder {
 

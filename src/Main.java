@@ -1,5 +1,4 @@
-import org.agromax.AgroMax;
-import org.agromax.ResourceManager;
+import org.agromax.vocab.VocabLoader;
 
 import java.net.URISyntaxException;
 
@@ -28,7 +27,8 @@ public class Main {
         model.write(System.out);
 */
 
-        ResourceManager rm = ResourceManager.getInstance();
-        AgroMax.getTriples(rm.get(System.getProperty("user.dir") + "/data/test.txt"));
+//        ResourceManager rm = ResourceManager.getInstance();
+//        AgroMax.getTriples(rm.get(System.getProperty("user.dir") + "/data/test.txt"));
+            System.out.println(VocabLoader.loadAll());
     }
 }

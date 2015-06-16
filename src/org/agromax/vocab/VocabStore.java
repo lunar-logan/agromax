@@ -14,14 +14,16 @@
  *    limitations under the License.
  */
 
-package org.agromax.util;
+package org.agromax.vocab;
+
+import org.agromax.util.Graph;
 
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import static org.agromax.Util.inOpenRange;
+import static org.agromax.util.Util.inOpenRange;
 
 /**
  * @author The Vision
@@ -40,11 +42,11 @@ public class VocabStore {
     /**
      * Inserts a new label into the tree
      */
-    public void insert(String id, String label) {
-        if (!isValidCatalog(id)) //
-            throw new IllegalArgumentException(String.format("Invalid catalogue id '%s', catalogue id must be of the form ([0-9]+\\.)+", id));
+    public void insert(String catalogue, String label) {
+//        if (!isValidCatalog(catalogue)) //
+//            throw new IllegalArgumentException(String.format("Invalid catalogue id '%s', catalogue id must be of the form ([0-9]+\\.)+", catalogue));
 
-        String[] ids = id.split("\\.");
+        String[] ids = catalogue.split("\\.");
         KnowledgeNode p = root;
 
         for (String iid : ids) {
@@ -52,7 +54,8 @@ public class VocabStore {
             if (p.hasChild(ii)) {
                 p = p.getChild(ii);
             } else {
-                throw new RuntimeException("Inconsistent Store state found. Does not contain the id:" + ii);
+//                System.err.println("Inconsistent Store state found. Does not contain the catalogue " + ii);
+//                throw new RuntimeException("Inconsistent Store state found. Does not contain the id:" + ii);
             }
         }
 
@@ -62,7 +65,11 @@ public class VocabStore {
     }
 
     public Set<String> getRelatedDomains(String term) {
-        return graph.relatedTerms(term, true);
+        return graph.relatedTerms(term, false);
+    }
+
+    public String getMemoryUsage() {
+        return graph.getMemorySize();
     }
 
     public List<String> getSubDomains(String... hierarchy) {
@@ -100,7 +107,7 @@ public class VocabStore {
     /**
      * Represents a domain
      */
-    static class KnowledgeNode {
+    private static class KnowledgeNode {
 
         private static final int MAX_CHILDREN = 50;
 
