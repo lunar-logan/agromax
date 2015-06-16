@@ -19,6 +19,7 @@ package org.agromax.util;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import static org.agromax.Util.inOpenRange;
 
@@ -29,22 +30,19 @@ public class VocabStore {
 
     public VocabStore() {
         this.root = new KnowledgeNode("_root@" + System.currentTimeMillis());
+        graph = new Graph();
     }
 
-    private boolean hasValidId(String id) {
-        return id.indexOf('.') > 0;
-    }
-
-    private String sanitizeString(String str) {
-        return str;
+    private static boolean isValidCatalog(String catalogue) {
+        return catalogue.matches("([0-9]+\\.)+");
     }
 
     /**
      * Inserts a new label into the tree
      */
     public void insert(String id, String label) {
-        if (!id.matches("([0-9]+\\.)+")) //
-            throw new IllegalArgumentException(String.format("Invalid id '%s', and id must be of the form ([0-9]+\\.)+", id));
+        if (!isValidCatalog(id)) //
+            throw new IllegalArgumentException(String.format("Invalid catalogue id '%s', catalogue id must be of the form ([0-9]+\\.)+", id));
 
         String[] ids = id.split("\\.");
         KnowledgeNode p = root;
@@ -60,13 +58,11 @@ public class VocabStore {
 
         int jj = Integer.parseInt(ids[ids.length - 1]);
         p.insert(jj, new KnowledgeNode(label));
+        graph.addUndirectedEdge(p.getLabel(), label);
     }
 
-    public void add(String id, String name) {
-//        if (!hasValidId(id))
-//            throw new IllegalArgumentException("'id' must be of the form [0-9]+\\.(\\.[0-9]+)*");
-//        name = sanitizeString(name);
-        insert(id, name);
+    public Set<String> getRelatedDomains(String term) {
+        return graph.relatedTerms(term, true);
     }
 
     public List<String> getSubDomains(String... hierarchy) {
@@ -94,6 +90,11 @@ public class VocabStore {
         }
 
         return subDomains;
+    }
+
+    @Override
+    public String toString() {
+        return graph.toString();
     }
 
     /**
@@ -149,4 +150,5 @@ public class VocabStore {
 
     private final KnowledgeNode root;
 
+    private final Graph graph;
 }

@@ -19,7 +19,7 @@ package org.agromax.util;
 import java.util.*;
 
 /**
- * @author The Joker, Hahahahahahaaaa!!
+ * @author Joker, Hahahahahahaaaa!!
  */
 public class Graph {
     public final Map<String, HashSet<String>> graph;
