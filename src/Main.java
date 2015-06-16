@@ -29,6 +29,6 @@ public class Main {
 */
 
         ResourceManager rm = ResourceManager.getInstance();
-        AgroMax.getTriples(rm.get("http://home.iitk.ac.in/~ganurag/cs365/projects/"));
+        AgroMax.getTriples(rm.get(System.getProperty("user.dir") + "/data/test.txt"));
     }
 }

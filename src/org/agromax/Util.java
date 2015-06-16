@@ -64,4 +64,20 @@ public class Util {
         }
         LOGGER.info(welder.toString());
     }
+
+    public static boolean inOpenRange(int a, int x, int b) {
+        return x > a && x < b;
+    }
+
+    public static boolean inClosedRange(int a, int x, int b) {
+        return x >= a && x <= b;
+    }
+
+    public static boolean inOpenRange(long a, long x, long b) {
+        return x > a && x < b;
+    }
+
+    public static boolean inClosedRange(long a, long x, long b) {
+        return x >= a && x <= b;
+    }
 }
