@@ -9,10 +9,10 @@ Updating soon
 
 Technology Stack
 ----------------
-+ Java (8+)
++ Java 8 **(Java 7 and below is not supported)**
 + Ant
 
-Awesome libraries like [Stanford parser] (http://nlp.stanford.edu/software/lex-parser.shtml), [Apache Jena] (https://jena.apache.org/) has been used. 
+Other awesome libraries like [Stanford parser] (http://nlp.stanford.edu/software/lex-parser.shtml), [Apache Jena] (https://jena.apache.org/) and [Jsoup](http://jsoup.org/) has been used. 
 
  
  
