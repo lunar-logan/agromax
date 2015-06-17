@@ -1,5 +1,9 @@
 package org.agromax.util;
 
+import org.agromax.core.Word;
+
+import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.logging.Logger;
 
 /**
@@ -15,6 +19,8 @@ public class Util {
     public static final String SP_TAGGER_PATH = "E:\\Coding\\Java Related\\stanford-parser\\stanford-parser-full-2015-04-20\\edu\\stanford\\nlp\\models\\pos-tagger\\english-left3words\\english-left3words-distsim.tagger";
 
     public static final String VOCAB_DIR = System.getProperty("user.dir") + "/data/vocab";
+
+    public static final String DATA_DIR = System.getProperty("user.dir");
 
     public static final class StringWelder {
 
@@ -65,6 +71,19 @@ public class Util {
             welder.add(String.valueOf(token));
         }
         LOGGER.info(welder.toString());
+    }
+
+    public static String dir(String base, String... parts) {
+        return Paths.get(base, parts).toString();
+    }
+
+    public static String weld(Collection<Word> collection, String separator) {
+        final StringBuilder value = new StringBuilder();
+        collection.forEach(e -> {
+            value.append(String.valueOf(e.getWord())).append(separator);
+        });
+
+        return value.toString().trim();
     }
 
     public static boolean inOpenRange(int a, int x, int b) {
