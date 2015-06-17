@@ -22,6 +22,17 @@ public class Util {
 
     public static final String DATA_DIR = System.getProperty("user.dir");
 
+    public static final String BASE_URL = "http://agromax.org";
+
+    public static String url(String... elements) {
+        StringBuilder url = new StringBuilder(BASE_URL);
+        for (String e : elements) {
+            url.append("/").append(e);
+        }
+//        url.delete(url.length() - 1, url.length());
+        return url.toString();
+    }
+
     public static final class StringWelder {
 
         private final String prefix;

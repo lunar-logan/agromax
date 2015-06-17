@@ -34,13 +34,14 @@ import org.agromax.util.Util;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
-import java.net.URLEncoder;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.TreeMap;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
+
+import static java.net.URLEncoder.encode;
+import static org.agromax.util.WordUtil.filterStopwords;
+import static org.agromax.util.WordUtil.weld;
 
 /**
  * This class, as named, generates RDF triples from a sentence.
@@ -52,6 +53,8 @@ public class RDFGenerator {
 
     private static final Logger logger = Logger.getLogger(RDFGenerator.class.getName());
 
+    private static String lastSubjectPhrase = "";
+
     public static Model getTriples(String text) {
         MaxentTagger tagger = new MaxentTagger(Util.SP_TAGGER_PATH);
         DependencyParser parser = DependencyParser.loadFromModelFile(Util.SP_MODEL_PATH);
@@ -60,7 +63,7 @@ public class RDFGenerator {
         DocumentPreprocessor tokenizer = new DocumentPreprocessor(new StringReader(text));
         logger.info("Text processing finish");
 
-        final Model agroModel = ModelFactory.createDefaultModel();
+        Model agroModel = ModelFactory.createDefaultModel();
 
         for (List<HasWord> sentence : tokenizer) {
             List<TaggedWord> tagged = tagger.tagSentence(sentence);
@@ -101,37 +104,77 @@ public class RDFGenerator {
         logger.info(relations.toString());
 
         // Find the triples
-        relations.forEach((p, o) -> {
-            final TreeSet<Word> subjectPhrase = new TreeSet<Word>();
-            final TreeSet<Word> objectPhrase = new TreeSet<Word>();
-            if (o.size() > 1) {
-                o.forEach(e -> {
-                    if (e.getIndex() < p.getIndex()) {
-                        subjectPhrase.add(e);
-                        if (relations.containsKey(e))
-                            subjectPhrase.addAll(relations.get(e));
-                    } else {
-                        objectPhrase.add(e);
-                        if (relations.containsKey(e))
-                            objectPhrase.addAll(relations.get(e));
-                    }
-                });
-            }
-            if (!subjectPhrase.isEmpty() && !objectPhrase.isEmpty()) {
-                Resource subj = null;
-                Property predicate = null;
-                try {
-                    subj = agroModel.createResource("http://agromax.org/" + URLEncoder.encode(Util.weld(subjectPhrase, " "), "utf-8"));
-                    String propertyName = "http://agromax.org/" + URLEncoder.encode(p.getWord(), "utf-8");
-//                    logger.log(Level.OFF, "Adding property \"" + propertyName + "\"");
-                    predicate = agroModel.createProperty(propertyName);
-                    subj.addProperty(predicate, Util.weld(objectPhrase, " "));
 
-                } catch (UnsupportedEncodingException | BadURIException e) {
-                    System.err.println(e.getMessage());
+        // Stores the last subject phrase, used for co-reference resolution
+
+        final HashSet<Word> visited = new HashSet<>();
+
+        relations.forEach((p, o) -> {
+            if (!visited.contains(p)) {
+                final TreeSet<Word> subjectPhrase = new TreeSet<Word>();
+                final TreeSet<Word> objectPhrase = new TreeSet<Word>();
+                if (o.size() > 1) {
+                    o.forEach(e -> {
+                        if (e.getIndex() < p.getIndex()) {
+                            subjectPhrase.add(e);
+                            if (relations.containsKey(e)) {
+                                relations.get(e).forEach(w -> {
+                                    if (w.getIndex() < e.getIndex())
+                                        subjectPhrase.add(w);
+                                });
+//                            subjectPhrase.addAll(relations.get(e));
+                            }
+                        } else {
+                            objectPhrase.add(e);
+
+                            Queue<Word> queue = new LinkedList<Word>();
+                            queue.add(e);
+                            while (!queue.isEmpty()) {
+                                Word e0 = queue.poll();
+                                if (relations.containsKey(e0)) {
+                                    relations.get(e0).forEach(w -> {
+//                                    if (w.getIndex() < e.getIndex())
+                                        objectPhrase.add(w);
+                                        queue.add(w);
+                                    });
+                                }
+//                                objectPhrase.addAll(relations.get(e));
+                            }
+                        }
+                    });
+                }
+                if (!subjectPhrase.isEmpty() && !objectPhrase.isEmpty()) {
+                    // Replace all PRP(It) words with the lastSubjectPhrase
+                    Stream<Word> subStream = subjectPhrase.stream().map(w -> {
+                        if (w.getTag().equalsIgnoreCase("PRP") && w.getWord().equalsIgnoreCase("it") && !lastSubjectPhrase.isEmpty()) {
+                            w.setWord(lastSubjectPhrase);
+                        }
+                        return w;
+                    });
+
+                    // Identify NNP word from subjectPhrase
+                    subjectPhrase.forEach(w -> {
+                        if (w.getTag().startsWith("NNP")) {
+                            lastSubjectPhrase = w.getWord();
+                        }
+                    });
+
+                    Resource subj = null;
+                    Property predicate = null;
+                    try {
+//                    lastSubjectPhrase = weld(replaceWord(subjectPhrase.stream(), "it", lastSubjectPhrase), " ");
+                        subj = agroModel.createResource(Util.url(encode(weld(filterStopwords(subStream), " "), "utf-8")));
+//                    String propertyName = "http://agromax.org/" + encode(p.getWord(), "utf-8");
+//                    logger.log(Level.OFF, "Adding property \"" + propertyName + "\"");
+                        predicate = agroModel.createProperty(Util.url(encode(p.getWord(), "utf-8")));
+                        subj.addProperty(predicate, weld(objectPhrase.stream(), " "));
+
+                    } catch (UnsupportedEncodingException | BadURIException e) {
+                        System.err.println(e.getMessage());
+                    }
                 }
             }
-
+            visited.add(p);
         });
 
         return agroModel;

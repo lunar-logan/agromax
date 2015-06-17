@@ -25,7 +25,7 @@ import java.util.Objects;
  * @see RDFGenerator
  */
 public class Word implements Comparable<Word> {
-    private final String word;
+    private String word;
     private final String posTag;
     private final int index;
 
@@ -42,6 +42,10 @@ public class Word implements Comparable<Word> {
             posTag = "";
             this.index = 0;
         }
+    }
+
+    public void setWord(String word) {
+        this.word = word;
     }
 
     public String getWord() {
