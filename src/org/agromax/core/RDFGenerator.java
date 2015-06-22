@@ -31,6 +31,8 @@ import edu.stanford.nlp.trees.TypedDependency;
 import org.agromax.ResourceManager;
 import org.agromax.util.Util;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
@@ -162,7 +164,6 @@ public class RDFGenerator {
                     Resource subj = null;
                     Property predicate = null;
                     try {
-//                    lastSubjectPhrase = weld(replaceWord(subjectPhrase.stream(), "it", lastSubjectPhrase), " ");
                         subj = agroModel.createResource(Util.url(encode(weld(filterStopwords(subStream), " "), "utf-8")));
 //                    String propertyName = "http://agromax.org/" + encode(p.getWord(), "utf-8");
 //                    logger.log(Level.OFF, "Adding property \"" + propertyName + "\"");
@@ -181,10 +182,15 @@ public class RDFGenerator {
 
     }
 
-    public static void main(String[] args) throws URISyntaxException {
+    public static void main(String[] args) throws URISyntaxException, IOException {
 
         ResourceManager rm = ResourceManager.getInstance();
-        Model triples = getTriples(rm.get(Paths.get(Util.DATA_DIR, "data", "test.txt").toString()));
-        triples.write(System.out);
+        Model triples = getTriples(rm.get(Paths.get(Util.DATA_DIR, "data", "test1.txt").toString()));
+
+        FileOutputStream outputFile = new FileOutputStream(Util.dir(Util.DATA_DIR,"data", "output.xml"));
+        logger.info("Writing output to " + outputFile);
+        triples.write(outputFile);
+        outputFile.flush();
+        outputFile.close();
     }
 }

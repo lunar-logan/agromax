@@ -16,18 +16,31 @@
 
 package org.agromax.core;
 
+import edu.stanford.nlp.ling.IndexedWord;
+
 import java.util.Objects;
 
 /**
- * Represents an english word, used within <code>RDFGenerator</code> class
+ * Represents an english word, used within <code>RDFGenerator</code> class.
+ * This class is closely knit with stanford-nlp library and uses (requires) <code>IndexedWord</code> class to run.
  *
  * @author Deadpool
+ * @version $revision$
  * @see RDFGenerator
+ * @since Agromax 1.0
  */
 public class Word implements Comparable<Word> {
     private String word;
     private final String posTag;
     private final int index;
+
+    public Word(IndexedWord indexedWord) {
+        Objects.requireNonNull(indexedWord);
+
+        word = indexedWord.word();
+        posTag = indexedWord.tag();
+        index = indexedWord.index();
+    }
 
     public Word(String str, int index) {
         Objects.requireNonNull(str, "word must not be null");

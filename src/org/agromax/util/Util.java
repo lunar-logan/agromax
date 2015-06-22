@@ -2,8 +2,12 @@ package org.agromax.util;
 
 import org.agromax.core.Word;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 /**
@@ -12,7 +16,27 @@ import java.util.logging.Logger;
  * @author The Joker, hahahahaaaaa!
  */
 public class Util {
-    private static final Logger LOGGER = Logger.getLogger("AgroMaxLogger");
+    private static final Logger LOGGER = Logger.getLogger(Util.class.getName());
+
+    static {
+        LOGGER.setUseParentHandlers(false);
+        LOGGER.addHandler(new Handler() {
+            @Override
+            public void publish(LogRecord record) {
+                System.out.println(String.format("%s: %s", record.getLevel().toString(), record.getMessage()));
+            }
+
+            @Override
+            public void flush() {
+
+            }
+
+            @Override
+            public void close() throws SecurityException {
+
+            }
+        });
+    }
 
     public static final String SP_MODEL_PATH = "E:\\Coding\\Java Related\\stanford-parser\\stanford-parser-full-2015-04-20\\edu\\stanford\\nlp\\models\\parser\\nndep\\english_UD.gz";
 
@@ -22,7 +46,7 @@ public class Util {
 
     public static final String DATA_DIR = System.getProperty("user.dir");
 
-    public static final String BASE_URL = "http://agromax.org";
+    public static final String BASE_URL = "http://agro";
 
     public static String url(String... elements) {
         StringBuilder url = new StringBuilder(BASE_URL);
@@ -76,6 +100,14 @@ public class Util {
 
     }
 
+    public static void log(Level level, Object... tokens) {
+        StringWelder welder = new StringWelder(" ");
+        for (Object token : tokens) {
+            welder.add(String.valueOf(token));
+        }
+        LOGGER.log(level, welder.toString());
+    }
+
     public static void log(Object... tokens) {
         StringWelder welder = new StringWelder(" ");
         for (Object token : tokens) {
@@ -88,12 +120,16 @@ public class Util {
         return Paths.get(base, parts).toString();
     }
 
+    public static Path dirPath(String... parts) {
+        String base = System.getProperty("user.dir");
+        return Paths.get(base, parts);
+    }
+
     public static String weld(Collection<Word> collection, String separator) {
-        final StringBuilder value = new StringBuilder();
-        collection.forEach(e -> {
+        StringBuilder value = new StringBuilder();
+        collection.stream().forEach(e -> {
             value.append(String.valueOf(e.getWord())).append(separator);
         });
-
         return value.toString().trim();
     }
 

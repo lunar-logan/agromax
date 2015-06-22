@@ -23,7 +23,10 @@ import java.util.Collection;
 import java.util.stream.Stream;
 
 /**
+ * <h1>NEEDS LOADS OF REVISIONS AND REDESIGN</h1>
+ *
  * @author Anurag Gautam
+ * @deprecated
  */
 public class WordUtil {
     public static Stream<Word> filterStopwords(Stream<Word> words) {
@@ -33,7 +36,7 @@ public class WordUtil {
     public static Stream<Word> replaceWord(Stream<Word> words, String what, String with) {
         return words.map(w -> {
             if (w.getWord().equalsIgnoreCase(what) && !with.isEmpty()) {
-                System.out.println("Rep 'it' with "+with);
+                System.out.println("Rep 'it' with " + with);
                 w.setWord(with);
             }
             return w;
