@@ -4,6 +4,8 @@ Agromax
 Agromax is a <code>Java</code> library that can process agricultural data to generate **RDF** triples. As of now **no** *triple store* has been 
  used. Output is simply generated as an xml file. 
  
+**This project is under bleeding edge development**
+ 
 Getting started
 ---------------
 Please see below the technology requirement before you could use it for your needs. 
