@@ -8,7 +8,7 @@ import java.io.Console;
 import java.util.List;
 
 /**
- * @author Bruce Wayne
+ * @author Anurag Gautam
  */
 public class AgroMax {
     public static void main(String[] args) {

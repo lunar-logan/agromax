@@ -21,6 +21,7 @@ import org.agromax.core.Word;
 
 import java.util.Collection;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 /**
@@ -59,6 +60,24 @@ public class WordUtil {
         collection.forEach(e -> {
             value.append(String.valueOf(e.getWord())).append(separator);
         });
+
+        return value.toString().trim();
+    }
+
+    public static String join(Stream<Word> stream, String separator, Function<String, String> decorator) {
+        Objects.requireNonNull(separator, "Word separator cannot be null");
+        Objects.requireNonNull(stream, "Word stream cannot be null");
+
+        StringBuilder value = new StringBuilder();
+        if (decorator != null) {
+            stream.forEach(e -> {
+                value.append(decorator.apply(e.getWord())).append(separator);
+            });
+        } else {
+            stream.forEach(e -> {
+                value.append(e.getWord()).append(separator);
+            });
+        }
 
         return value.toString().trim();
     }

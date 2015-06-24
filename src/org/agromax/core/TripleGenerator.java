@@ -167,8 +167,16 @@ public class TripleGenerator {
                     }
                 });
 
-                String subject = WordUtil.join(subStream, " ");
-                String object = WordUtil.join(objectPhrase.stream(), " ");
+                String subject = WordUtil.join(subStream, " ", w -> {
+                    if (!Stopwords.STOPWORDS.contains(w.toLowerCase()))
+                        return String.format("<b>%s</b>", w);
+                    return w;
+                });
+                String object = WordUtil.join(objectPhrase.stream(), " ", w -> {
+                    if (!Stopwords.STOPWORDS.contains(w.toLowerCase()))
+                        return String.format("<b>%s</b>", w);
+                    return w;
+                });
                 String predicate = u.getWord();
 
                 triples.add(new Triple<>(subject, predicate, object));
