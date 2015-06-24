@@ -24,9 +24,11 @@ import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.TypedDependency;
 import org.agromax.util.Util;
+import org.agromax.util.WordUtil;
 
 import java.io.StringReader;
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * @author Anurag Gautam
@@ -50,10 +52,12 @@ public class TripleGenerator {
         }
     }
 
-    public static List<Triple<TreeSet<Word>, Word, TreeSet<Word>>> getTriples(String text) {
+    private static String lastSubjectPhrase = "";
+
+    public static List<Triple<String, String, String>> getTriples(String text) {
         MaxentTagger tagger = new MaxentTagger(Util.SP_TAGGER_PATH);
         DependencyParser parser = DependencyParser.loadFromModelFile(Util.SP_MODEL_PATH);
-        List<Triple<TreeSet<Word>, Word, TreeSet<Word>>> allTriples = new LinkedList<>();
+        List<Triple<String, String, String>> allTriples = new LinkedList<>();
         DocumentPreprocessor tokenizer = new DocumentPreprocessor(new StringReader(text));
 
         for (List<HasWord> sentence : tokenizer) {
@@ -82,7 +86,7 @@ public class TripleGenerator {
             System.out.println("====\n");
 
             Util.log("Beginning to process the graph");
-            List<Triple<TreeSet<Word>, Word, TreeSet<Word>>> triples = process(gs, relations);
+            List<Triple<String, String, String>> triples = process(gs, relations);
             Util.log("graph processing is complete");
 
             Util.log("Generated ", triples.size(), " triple(s)");
@@ -94,10 +98,10 @@ public class TripleGenerator {
         return allTriples;
     }
 
-    private static List<Triple<TreeSet<Word>, Word, TreeSet<Word>>> process(GrammaticalStructure gs, TreeMap<Word, TreeSet<Word>> relationMap) {
+    private static List<Triple<String, String, String>> process(GrammaticalStructure gs, TreeMap<Word, TreeSet<Word>> relationMap) {
         final Queue<Word> queue = new LinkedList<>();
         final TreeSet<Word> visited = new TreeSet<>();
-        final List<Triple<TreeSet<Word>, Word, TreeSet<Word>>> triples = new LinkedList<>();
+        final List<Triple<String, String, String>> triples = new LinkedList<>();
 
         for (Word u : relationMap.keySet()) {
             TreeSet<Word> subjectPhrase = new TreeSet<>();
@@ -144,14 +148,37 @@ public class TripleGenerator {
                 }
             });
 
-            if (subjectPhrase.size() > 0 && objectPhrase.size() > 0)
-                triples.add(new Triple<>(subjectPhrase, u, objectPhrase));
+            if (subjectPhrase.size() > 0 && objectPhrase.size() > 0) {
+
+                // Co-reference resolution phase
+                // Replace pronouns with previous sentence's subject
+                Stream<Word> subStream = subjectPhrase.stream().map(w -> {
+                    if (w.getTag().equalsIgnoreCase("PRP") && w.getWord().equalsIgnoreCase("it") && !lastSubjectPhrase.isEmpty()) {
+                        w.setWord(lastSubjectPhrase);
+                    }
+                    return w;
+                });
+
+                // Identify NNP word from subjectPhrase, will be used for coreference resolution in the next line
+                // of text
+                subjectPhrase.forEach(w -> {
+                    if (w.getTag().startsWith("NNP")) {
+                        lastSubjectPhrase = w.getWord();
+                    }
+                });
+
+                String subject = WordUtil.join(subStream, " ");
+                String object = WordUtil.join(objectPhrase.stream(), " ");
+                String predicate = u.getWord();
+
+                triples.add(new Triple<>(subject, predicate, object));
+            }
 
         }
         return triples;
     }
 
-    public static String publish(List<Triple<TreeSet<Word>, Word, TreeSet<Word>>> triples) {
+    public static String publish(List<Triple<String, String, String>> triples) {
         StringBuilder markup = new StringBuilder();
         markup.append("<!doctype HTML>")
                 .append("<html>")
@@ -168,7 +195,7 @@ public class TripleGenerator {
         triples.stream().forEach(t -> {
             markup.append("<tr>")
                     .append("<td>").append(t.first).append("</td>")
-                    .append("<td>").append(t.second.getWord()).append("</td>")
+                    .append("<td>").append(t.second).append("</td>")
                     .append("<td>").append(t.third).append("</td>")
                     .append("</tr>");
         });

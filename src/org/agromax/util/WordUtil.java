@@ -20,13 +20,13 @@ import org.agromax.core.Stopwords;
 import org.agromax.core.Word;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
  * <h1>NEEDS LOADS OF REVISIONS AND REDESIGN</h1>
  *
  * @author Anurag Gautam
- * @deprecated
  */
 public class WordUtil {
     public static Stream<Word> filterStopwords(Stream<Word> words) {
@@ -43,6 +43,7 @@ public class WordUtil {
         });
     }
 
+    @Deprecated
     public static String weld(Stream<Word> collection, String separator) {
         StringBuilder value = new StringBuilder();
         collection.forEach(e -> {
@@ -52,10 +53,23 @@ public class WordUtil {
         return value.toString().trim();
     }
 
+    @Deprecated
     public static String weld(Collection<Word> collection, String separator) {
         StringBuilder value = new StringBuilder();
         collection.forEach(e -> {
             value.append(String.valueOf(e.getWord())).append(separator);
+        });
+
+        return value.toString().trim();
+    }
+
+    public static String join(Stream<Word> stream, String separator) {
+        Objects.requireNonNull(separator, "Word separator cannot be null");
+        Objects.requireNonNull(stream, "Word stream cannot be null");
+
+        StringBuilder value = new StringBuilder();
+        stream.forEach(e -> {
+            value.append(e.getWord()).append(separator);
         });
 
         return value.toString().trim();
