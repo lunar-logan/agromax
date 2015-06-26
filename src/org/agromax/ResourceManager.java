@@ -11,6 +11,8 @@ import java.net.UnknownHostException;
 import java.nio.file.Paths;
 
 /**
+ * TODO: This class needs attention
+ *
  * @author Riddler
  */
 public class ResourceManager {

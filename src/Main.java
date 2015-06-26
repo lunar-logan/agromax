@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.util.logging.Logger;
 
 /**
+ * TODO: ResourceManager class needs attention. Unable to handle path separator character.
  * @author Anurag Gautam
  */
 public class Main {
