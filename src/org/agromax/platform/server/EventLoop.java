@@ -16,8 +16,9 @@
 
 package org.agromax.platform.server;
 
+import edu.stanford.nlp.ling.TaggedWord;
+import org.agromax.ResourceManager;
 import org.agromax.core.StanfordParserContext;
-import org.agromax.util.Util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,7 +26,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
@@ -72,7 +75,7 @@ public class EventLoop implements Runnable {
         stopServer = true;
     }
 
-    static class Request {
+    class Request {
         private final String commandName;
         private final Object[] parameters;
 
@@ -85,8 +88,8 @@ public class EventLoop implements Runnable {
             return parameters;
         }
 
-        public Object getCommand(int i) {
-            if (Util.inClosedRange(0, i, parameters.length - 1)) {
+        public Object getParameter(int i) {
+            if (i < 0 || i >= parameters.length) {
                 throw new IndexOutOfBoundsException("Index " + i + " is out of bounds");
             }
             return parameters[i];
@@ -97,23 +100,41 @@ public class EventLoop implements Runnable {
         }
     }
 
-    static class Response {
+    class Response {
         private final Request request;
+        private List<TaggedWord> result;
 
         public Response(Request request) {
             this.request = request;
+            // Process request to compute the response
+            if (request.getCommandName().equalsIgnoreCase("tag")) {
+                String uri = (String) request.getParameter(1);
+                System.out.println("uri: " + uri);
+                try {
+                    String text = ResourceManager.getInstance().get(uri);
+//                    System.out.println("Text: " + text);
+                    if (text != null) {
+                        result = stanfordContext.tag(text);
+                    } else {
+                        logger.warning("text is null");
+                    }
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         public void write(OutputStream outputStream) {
             try {
-                outputStream.write("Input received".getBytes());
+                System.out.println("Result: " + result);
+                outputStream.write(result.toString().getBytes());
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    static class RequestHandler implements Runnable {
+    class RequestHandler implements Runnable {
         private final Socket client;
 
         public RequestHandler(Socket client) {

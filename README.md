@@ -20,4 +20,7 @@ Technology Stack
 Other awesome libraries like [Stanford parser] (http://nlp.stanford.edu/software/lex-parser.shtml), [Apache Jena] (https://jena.apache.org/) and [Jsoup](http://jsoup.org/) have been used. 
 <code>MongoDB</code> is used only for caching purpose and is not mandatory.  
  
+Update Notes
+-------------
+**26/6/2015**: Added <code>Bootloader</code> and <code>EventLoop</code> classes.
  
