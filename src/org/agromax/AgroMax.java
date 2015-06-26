@@ -4,7 +4,6 @@ import org.agromax.core.TripleGenerator;
 import org.agromax.util.FileUtil;
 import org.agromax.util.Util;
 
-import java.io.Console;
 import java.util.List;
 
 /**
@@ -16,6 +15,6 @@ public class AgroMax {
         List<TripleGenerator.Triple<String, String, String>> triples = TripleGenerator.getTriples(text);
         String markup = TripleGenerator.publish(triples);
         FileUtil.write(markup, Util.dirPath("data", "output.html"));
-        Console console = System.console();
+//        Console console = System.console();
     }
 }

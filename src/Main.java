@@ -1,11 +1,22 @@
+import edu.stanford.nlp.parser.nndep.DependencyParser;
+import edu.stanford.nlp.tagger.maxent.MaxentTagger;
+import org.agromax.core.StanfordParserContext;
+import org.agromax.platform.bootloader.*;
+import org.agromax.platform.server.EventLoop;
+import org.agromax.util.Util;
+
 import java.net.URISyntaxException;
+import java.util.logging.Logger;
 
 /**
  * @author Anurag Gautam
  */
 public class Main {
+    static StanfordParserContext parserContext = null;
 
-    public static void main(String[] args) throws URISyntaxException {
+    static final Logger logger = Logger.getLogger(Main.class.getName());
+
+    public static void main(String[] args) throws URISyntaxException, InterruptedException {
 
 //        logger.info("Creating a default model, using ModelFactory");
 //        Model model = ModelFactory.createDefaultModel();
@@ -27,6 +38,40 @@ public class Main {
 //        ResourceManager rm = ResourceManager.getInstance();
 //        AgroMax.getTriples(rm.get(System.getProperty("user.dir") + "/data/test.txt"));
 //            System.out.println(VocabLoader.loadAll());
+
+        Bootloader bootloader = new Bootloader();
+
+        // Add action to load stanford parser
+        bootloader.addAction(new BootAction() {
+            @Override
+            public String getName() {
+                return "Stanford parser loader";
+            }
+
+            @Override
+            public BootActionType getType() {
+                return BootActionType.REQUIRED;
+            }
+
+            @Override
+            public void perform() throws BootActionException {
+                MaxentTagger tagger = new MaxentTagger(Util.SP_TAGGER_PATH);
+                DependencyParser parser = DependencyParser.loadFromModelFile(Util.SP_MODEL_PATH);
+                parserContext = new StanfordParserContext(tagger, parser);
+            }
+        });
+
+        BootResult result = bootloader.boot();
+        logger.info("Booting completed in " + result.getBootTime() + " sec(s).");
+        if (parserContext != null) {
+            logger.info("Parser context created");
+            EventLoop eventLoop = EventLoop.getInstance(parserContext);
+            Thread serverThread = new Thread(eventLoop);
+            serverThread.start();
+            serverThread.join();
+        } else {
+            logger.severe("Parser context could not be created");
+        }
 
     }
 }
