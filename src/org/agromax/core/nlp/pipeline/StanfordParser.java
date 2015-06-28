@@ -32,6 +32,10 @@ import java.util.List;
 import java.util.Objects;
 
 /**
+ * Represents a stanford parser context, basically a wrapper around
+ * stanford parser API. All SP methods must be invoked using this class.
+ * This class is thread safe.
+ *
  * @author Anurag Gautam
  */
 public class StanfordParser extends AbstractParser {
