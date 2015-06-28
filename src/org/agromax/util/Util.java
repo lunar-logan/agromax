@@ -5,6 +5,7 @@ import org.agromax.core.nlp.pipeline.ComparableWord;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
@@ -130,6 +131,17 @@ public class Util {
         collection.stream().forEach(e -> {
             value.append(String.valueOf(e.getWord())).append(separator);
         });
+        return value.toString().trim();
+    }
+
+    public static String weld(Object[] elements, int from, int length, CharSequence sep) {
+        Objects.requireNonNull(elements);
+        Objects.requireNonNull(sep);
+
+        StringBuilder value = new StringBuilder();
+        for (Object element : elements) {
+            value.append(String.valueOf(element)).append(sep);
+        }
         return value.toString().trim();
     }
 

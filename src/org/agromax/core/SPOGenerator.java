@@ -49,31 +49,32 @@ public class SPOGenerator {
     private static final TreeSet<ComparableWord> lastSubjectPhrase = new TreeSet<>();
 
 
-    private static TreeMap<ComparableWord, TreeSet<ComparableWord>> graph;
+    private static List<TreeMap<ComparableWord, TreeSet<ComparableWord>>> graph = new LinkedList<>();
+    private static List<List<Triple<String, String, String>>> triples = new LinkedList<>();
 
-    public static TreeMap<ComparableWord, TreeSet<ComparableWord>> getRelationshipGraph(SPPipeline pipeline, CharSequence text) {
+    public static List<TreeMap<ComparableWord, TreeSet<ComparableWord>>> getRelationshipGraph(SPPipeline pipeline, CharSequence text) {
         pipeline.registerPipelineAction((taggedWords, dependency) -> {
-            graph = getRelationshipGraph(dependency);
+            graph.add(getRelationshipGraph(dependency));
 //            logger.info("Generated relationship graph");
         });
-
         pipeline.schedule(text);
         return graph;
     }
 
-    public static TreeMap<ComparableWord, TreeSet<ComparableWord>> generate(SPPipeline pipeline, CharSequence text) {
+    public static List<List<Triple<String, String, String>>> generate(SPPipeline pipeline, CharSequence text) {
+
         pipeline.registerPipelineAction((taggedWords, dependency) -> {
-            graph = getRelationshipGraph(dependency);
+            TreeMap<ComparableWord, TreeSet<ComparableWord>> relationshipGraph = getRelationshipGraph(dependency);
 //            logger.info("Generated relationship graph");
-//            graph.forEach((k, v) -> System.out.println(k + " => " + v));
-//            List<Triple<String, String, String>> triples = getTriples(dependency, taggedWords, graph);
+            triples.add(Maya.getTriples(dependency, taggedWords, relationshipGraph));
 //            logger.info(triples.size() + " triples generated");
 //            triples.forEach(System.out::println);
+
         });
 
         pipeline.schedule(text);
 
-        return graph;
+        return triples;
     }
 
     /**

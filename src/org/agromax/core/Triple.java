@@ -34,6 +34,6 @@ public class Triple<P, Q, R> {
 
     @Override
     public String toString() {
-        return String.format("(%s, %s, %s)", String.valueOf(first), String.valueOf(second), String.valueOf(third));
+        return String.format("(%s -- %s -- %s)", String.valueOf(first), String.valueOf(second), String.valueOf(third));
     }
 }

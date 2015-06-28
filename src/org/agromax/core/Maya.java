@@ -131,18 +131,20 @@ public class Maya {
                 }
             }
 
-            // Test
-            if (!predicatePhrase.isEmpty()) {
-                if (u.getIndex() > subjectPhrase.last().getIndex()) {
-                    objectPhrase.add(u);
-                } else {
-                    subjectPhrase.add(u);
-                }
-            }
+
 
             // Only if are able to identify at least one object and atleast one subject phrase
             // we consider the triple for output
             if (subjectPhrase.size() > 0 && objectPhrase.size() > 0) {
+
+                // Test
+                if (!predicatePhrase.isEmpty()) {
+                    if (u.getIndex() > subjectPhrase.last().getIndex()) {
+                        objectPhrase.add(u);
+                    } else {
+                        subjectPhrase.add(u);
+                    }
+                }
 
                 /* Co-reference resolution phase
                  Replace pronouns with previous sentence's subject, the approach we use is very naive.
@@ -189,7 +191,7 @@ public class Maya {
                 String object = WordUtil.join(objectPhrase.stream(), " ", w -> {
                     if (!Stopwords.STOPWORDS.contains(w.toLowerCase()))
                         return w;
-                    return "";
+                    return w;
                 });
                 String predicate = u.getWord();
 //                System.out.println(object + " -- " + predicate);
@@ -198,7 +200,7 @@ public class Maya {
                     String subject = WordUtil.join(subjPhrase.stream(), " ", w -> {
                         if (!Stopwords.STOPWORDS.contains(w.toLowerCase()))
                             return w;
-                        return "";
+                        return w;
                     });
                     triples.add(new Triple<>(subject, predicate, object));
                 });

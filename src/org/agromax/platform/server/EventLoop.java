@@ -18,8 +18,6 @@ package org.agromax.platform.server;
 
 import edu.stanford.nlp.ling.TaggedWord;
 import org.agromax.ResourceManager;
-import org.agromax.core.SPOGenerator;
-import org.agromax.core.nlp.pipeline.ComparableWord;
 import org.agromax.core.nlp.pipeline.SPPipeline;
 import org.agromax.util.Util;
 
@@ -31,7 +29,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
@@ -132,8 +132,8 @@ public class EventLoop implements Runnable {
                 Path path = Util.dirPath(params);
                 try {
                     String text = ResourceManager.getInstance().get(path.toString());
-                    TreeMap<ComparableWord, TreeSet<ComparableWord>> relationshipGraph = SPOGenerator.getRelationshipGraph(pipeline, text);
-                    relationshipGraph.forEach((k, v) -> System.out.println(k + " => " + v));
+//                    TreeMap<ComparableWord, TreeSet<ComparableWord>> relationshipGraph = SPOGenerator.getRelationshipGraph(pipeline, text);
+//                    relationshipGraph.forEach((k, v) -> System.out.println(k + " => " + v));
 
                 } catch (URISyntaxException e) {
                     e.printStackTrace();

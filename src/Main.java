@@ -3,7 +3,7 @@ import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import org.agromax.core.nlp.pipeline.SPPipeline;
 import org.agromax.core.nlp.pipeline.StanfordParser;
 import org.agromax.platform.bootloader.*;
-import org.agromax.platform.server.EventLoop;
+import org.agromax.platform.server.CmdHost;
 import org.agromax.util.Util;
 
 import java.net.URISyntaxException;
@@ -68,10 +68,12 @@ public class Main {
         logger.info("Booting completed in " + result.getBootTime() + " sec(s).");
         if (pipeline != null) {
             logger.info("Parser context created");
-            EventLoop eventLoop = EventLoop.getInstance(pipeline);
-            Thread serverThread = new Thread(eventLoop);
-            serverThread.start();
-            serverThread.join();
+//            EventLoop eventLoop = EventLoop.getInstance(pipeline);
+//            Thread serverThread = new Thread(eventLoop);
+//            serverThread.start();
+//            serverThread.join();
+            CmdHost host = new CmdHost(pipeline);
+            host.run();
         } else {
             logger.severe("Parser context could not be created");
         }
