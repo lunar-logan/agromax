@@ -18,11 +18,8 @@ package org.agromax.core.nlp.pipeline;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.TaggedWord;
-import edu.stanford.nlp.parser.nndep.DependencyParser;
 import edu.stanford.nlp.process.DocumentPreprocessor;
-import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.trees.TypedDependency;
-import org.agromax.util.Util;
 
 import java.io.StringReader;
 import java.util.Collection;
@@ -62,7 +59,7 @@ public class SPPipeline {
             });
         }
     }
-
+/*
     public static void main(String[] args) {
         MaxentTagger tagger = new MaxentTagger(Util.SP_TAGGER_PATH);
         DependencyParser parser = DependencyParser.loadFromModelFile(Util.SP_MODEL_PATH);
@@ -77,5 +74,5 @@ public class SPPipeline {
         });
 
         pipeline.schedule("I can almost always tell when movies use fake dinosaurs. I was born in Kanpur.");
-    }
+    }*/
 }

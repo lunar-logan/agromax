@@ -18,7 +18,10 @@ package org.agromax.platform.server;
 
 import edu.stanford.nlp.ling.TaggedWord;
 import org.agromax.ResourceManager;
-import org.agromax.core.StanfordParserContext;
+import org.agromax.core.SPOGenerator;
+import org.agromax.core.nlp.pipeline.ComparableWord;
+import org.agromax.core.nlp.pipeline.SPPipeline;
+import org.agromax.util.Util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,8 +30,8 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.List;
+import java.nio.file.Path;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Logger;
@@ -41,14 +44,14 @@ public class EventLoop implements Runnable {
     private static final EventLoop ourInstance = new EventLoop();
 
     private static final Logger logger = Logger.getLogger(EventLoop.class.getName());
+    private SPPipeline pipeline;
 
-    public static EventLoop getInstance(StanfordParserContext context) {
-        ourInstance.stanfordContext = context;
+    public static EventLoop getInstance(SPPipeline pipeline) {
+        ourInstance.pipeline = pipeline;
         return ourInstance;
     }
 
     private volatile boolean stopServer = false;
-    private volatile StanfordParserContext stanfordContext = null;
 
     private EventLoop() {
     }
@@ -102,7 +105,7 @@ public class EventLoop implements Runnable {
 
     class Response {
         private final Request request;
-        private List<TaggedWord> result;
+        private List<TaggedWord> result = new LinkedList<>();
 
         public Response(Request request) {
             this.request = request;
@@ -114,10 +117,24 @@ public class EventLoop implements Runnable {
                     String text = ResourceManager.getInstance().get(uri);
 //                    System.out.println("Text: " + text);
                     if (text != null) {
-                        result = stanfordContext.tag(text);
+//                        result = stanfordContext.tagSentence(text);
                     } else {
                         logger.warning("text is null");
                     }
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                }
+            } else if (request.getCommandName().equalsIgnoreCase("graph")) {
+                String[] params = new String[request.parameters.length - 1];
+                for (int i = 0; i < params.length; i++) {
+                    params[i] = String.valueOf(request.getParameter(i + 1));
+                }
+                Path path = Util.dirPath(params);
+                try {
+                    String text = ResourceManager.getInstance().get(path.toString());
+                    TreeMap<ComparableWord, TreeSet<ComparableWord>> relationshipGraph = SPOGenerator.getRelationshipGraph(pipeline, text);
+                    relationshipGraph.forEach((k, v) -> System.out.println(k + " => " + v));
+
                 } catch (URISyntaxException e) {
                     e.printStackTrace();
                 }
@@ -144,13 +161,15 @@ public class EventLoop implements Runnable {
         @Override
         public void run() {
             try {
-                BufferedReader br = new BufferedReader(new InputStreamReader(client.getInputStream()));
-                String[] reqElements = br.readLine().replaceAll(" +", " ").trim().split(" ");
-                System.out.println(Arrays.toString(reqElements));
-                Request req = new Request(reqElements[0], reqElements);
-                Response res = new Response(req);
-                res.write(client.getOutputStream());
-                client.close();
+                while (client.isConnected()) {
+                    BufferedReader br = new BufferedReader(new InputStreamReader(client.getInputStream()));
+                    String[] reqElements = br.readLine().replaceAll(" +", " ").trim().split(" ");
+                    System.out.println(Arrays.toString(reqElements));
+                    Request req = new Request(reqElements[0], reqElements);
+                    Response res = new Response(req);
+                    res.write(client.getOutputStream());
+//                client.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }

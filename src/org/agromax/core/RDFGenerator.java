@@ -29,6 +29,7 @@ import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.TypedDependency;
 import org.agromax.ResourceManager;
+import org.agromax.core.nlp.pipeline.ComparableWord;
 import org.agromax.util.Util;
 
 import java.io.FileOutputStream;
@@ -49,6 +50,7 @@ import static org.agromax.util.WordUtil.weld;
  * This class, as named, generates RDF triples from a sentence.
  * For better results <b>electrocute</b> your brain weekly.
  *
+ * @deprecated
  * @author Harley Quinn
  */
 public class RDFGenerator {
@@ -85,19 +87,19 @@ public class RDFGenerator {
     }
 
     private static Model triples(GrammaticalStructure gs, ArrayList<TaggedWord> tagged, Model agroModel) {
-        final TreeMap<Word, TreeSet<Word>> relations = new TreeMap<>();
+        final TreeMap<ComparableWord, TreeSet<ComparableWord>> relations = new TreeMap<>();
 
         for (TypedDependency d : gs.typedDependencies()) {
 
-            Word gov = new Word(d.gov().toString(), d.gov().index());
-            Word dep = new Word(d.dep().toString(), d.dep().index());
+            ComparableWord gov = new ComparableWord(d.gov().toString(), d.gov().index());
+            ComparableWord dep = new ComparableWord(d.dep().toString(), d.dep().index());
 //            String dep = d.dep().toString();
 
             if (relations.containsKey(gov)) {
-                relations.get(gov).add(dep);//new Word(dep, d.dep().index()));
+                relations.get(gov).add(dep);//new ComparableWord(dep, d.dep().index()));
             } else {
-                TreeSet<Word> set = new TreeSet<>();
-                set.add(dep);//new Word(dep, d.dep().index()));
+                TreeSet<ComparableWord> set = new TreeSet<>();
+                set.add(dep);//new ComparableWord(dep, d.dep().index()));
                 relations.put(gov, set);
             }
         }
@@ -109,12 +111,12 @@ public class RDFGenerator {
 
         // Stores the last subject phrase, used for co-reference resolution
 
-        final HashSet<Word> visited = new HashSet<>();
+        final HashSet<ComparableWord> visited = new HashSet<>();
 
         relations.forEach((p, o) -> {
             if (!visited.contains(p)) {
-                final TreeSet<Word> subjectPhrase = new TreeSet<Word>();
-                final TreeSet<Word> objectPhrase = new TreeSet<Word>();
+                final TreeSet<ComparableWord> subjectPhrase = new TreeSet<ComparableWord>();
+                final TreeSet<ComparableWord> objectPhrase = new TreeSet<ComparableWord>();
                 if (o.size() > 1) {
                     o.forEach(e -> {
                         if (e.getIndex() < p.getIndex()) {
@@ -129,10 +131,10 @@ public class RDFGenerator {
                         } else {
                             objectPhrase.add(e);
 
-                            Queue<Word> queue = new LinkedList<Word>();
+                            Queue<ComparableWord> queue = new LinkedList<ComparableWord>();
                             queue.add(e);
                             while (!queue.isEmpty()) {
-                                Word e0 = queue.poll();
+                                ComparableWord e0 = queue.poll();
                                 if (relations.containsKey(e0)) {
                                     relations.get(e0).forEach(w -> {
 //                                    if (w.getIndex() < e.getIndex())
@@ -147,7 +149,7 @@ public class RDFGenerator {
                 }
                 if (!subjectPhrase.isEmpty() && !objectPhrase.isEmpty()) {
                     // Replace all PRP(It) words with the lastSubjectPhrase
-                    Stream<Word> subStream = subjectPhrase.stream().map(w -> {
+                    Stream<ComparableWord> subStream = subjectPhrase.stream().map(w -> {
                         if (w.getTag().equalsIgnoreCase("PRP") && w.getWord().equalsIgnoreCase("it") && !lastSubjectPhrase.isEmpty()) {
                             w.setWord(lastSubjectPhrase);
                         }

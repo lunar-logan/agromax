@@ -51,7 +51,7 @@ public class Bootloader {
 
     public BootResult boot() {
 
-        logger.info("Beginning to perform boot actions");
+        logger.info("Beginning cold boot");
         long startTime = System.currentTimeMillis();
         while (!actions.isEmpty()) {
             BootAction action = actions.poll();

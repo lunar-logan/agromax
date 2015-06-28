@@ -23,6 +23,7 @@ import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.TypedDependency;
+import org.agromax.core.nlp.pipeline.ComparableWord;
 import org.agromax.util.Util;
 import org.agromax.util.WordUtil;
 
@@ -65,15 +66,15 @@ public class TripleGenerator {
             GrammaticalStructure gs = parser.predict(tagged);
 
 //            System.out.println(gs);
-            TreeMap<Word, TreeSet<Word>> relations = new TreeMap<>();
+            TreeMap<ComparableWord, TreeSet<ComparableWord>> relations = new TreeMap<>();
             for (TypedDependency d : gs.typedDependencies()) {
-                Word gov = new Word(d.gov());
-                Word dep = new Word(d.dep());
+                ComparableWord gov = new ComparableWord(d.gov());
+                ComparableWord dep = new ComparableWord(d.dep());
 
                 if (relations.containsKey(gov)) {
                     relations.get(gov).add(dep);
                 } else {
-                    TreeSet<Word> set = new TreeSet<>();
+                    TreeSet<ComparableWord> set = new TreeSet<>();
                     set.add(dep);
                     relations.put(gov, set);
                 }
@@ -98,14 +99,14 @@ public class TripleGenerator {
         return allTriples;
     }
 
-    private static List<Triple<String, String, String>> process(GrammaticalStructure gs, TreeMap<Word, TreeSet<Word>> relationMap) {
-        final Queue<Word> queue = new LinkedList<>();
-        final TreeSet<Word> visited = new TreeSet<>();
+    private static List<Triple<String, String, String>> process(GrammaticalStructure gs, TreeMap<ComparableWord, TreeSet<ComparableWord>> relationMap) {
+        final Queue<ComparableWord> queue = new LinkedList<>();
+        final TreeSet<ComparableWord> visited = new TreeSet<>();
         final List<Triple<String, String, String>> triples = new LinkedList<>();
 
-        for (Word u : relationMap.keySet()) {
-            TreeSet<Word> subjectPhrase = new TreeSet<>();
-            TreeSet<Word> objectPhrase = new TreeSet<>();
+        for (ComparableWord u : relationMap.keySet()) {
+            TreeSet<ComparableWord> subjectPhrase = new TreeSet<>();
+            TreeSet<ComparableWord> objectPhrase = new TreeSet<>();
 
             relationMap.get(u).stream().forEach(v -> {
                 queue.clear();
@@ -115,11 +116,11 @@ public class TripleGenerator {
                 if (v.getIndex() < u.getIndex()) {
                     queue.add(v);
                     while (!queue.isEmpty()) {
-                        Word w = queue.poll();
+                        ComparableWord w = queue.poll();
                         subjectPhrase.add(w);
                         if (!visited.contains(w)) {
                             if (relationMap.containsKey(w)) {
-                                for (Word x : relationMap.get(w)) {
+                                for (ComparableWord x : relationMap.get(w)) {
                                     subjectPhrase.add(x);
                                     queue.add(x);
                                 }
@@ -133,11 +134,11 @@ public class TripleGenerator {
                     // Get the object
                     queue.add(v);
                     while (!queue.isEmpty()) {
-                        Word w = queue.poll();
+                        ComparableWord w = queue.poll();
                         objectPhrase.add(w);
                         if (!visited.contains(w)) {
                             if (relationMap.containsKey(w)) {
-                                for (Word x : relationMap.get(w)) {
+                                for (ComparableWord x : relationMap.get(w)) {
                                     objectPhrase.add(x);
                                     queue.add(x);
                                 }
@@ -152,7 +153,7 @@ public class TripleGenerator {
 
                 // Co-reference resolution phase
                 // Replace pronouns with previous sentence's subject
-                Stream<Word> subStream = subjectPhrase.stream().map(w -> {
+                Stream<ComparableWord> subStream = subjectPhrase.stream().map(w -> {
                     if (w.getTag().equalsIgnoreCase("PRP") && w.getWord().equalsIgnoreCase("it") && !lastSubjectPhrase.isEmpty()) {
                         w.setWord(lastSubjectPhrase);
                     }

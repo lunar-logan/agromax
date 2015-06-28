@@ -1,6 +1,7 @@
 import edu.stanford.nlp.parser.nndep.DependencyParser;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
-import org.agromax.core.StanfordParserContext;
+import org.agromax.core.nlp.pipeline.SPPipeline;
+import org.agromax.core.nlp.pipeline.StanfordParser;
 import org.agromax.platform.bootloader.*;
 import org.agromax.platform.server.EventLoop;
 import org.agromax.util.Util;
@@ -10,10 +11,11 @@ import java.util.logging.Logger;
 
 /**
  * TODO: ResourceManager class needs attention. Unable to handle path separator character.
+ *
  * @author Anurag Gautam
  */
 public class Main {
-    static StanfordParserContext parserContext = null;
+    static SPPipeline pipeline = null;
 
     static final Logger logger = Logger.getLogger(Main.class.getName());
 
@@ -58,15 +60,15 @@ public class Main {
             public void perform() throws BootActionException {
                 MaxentTagger tagger = new MaxentTagger(Util.SP_TAGGER_PATH);
                 DependencyParser parser = DependencyParser.loadFromModelFile(Util.SP_MODEL_PATH);
-                parserContext = new StanfordParserContext(tagger, parser);
+                pipeline = new SPPipeline(new StanfordParser(tagger, parser));
             }
         });
 
         BootResult result = bootloader.boot();
         logger.info("Booting completed in " + result.getBootTime() + " sec(s).");
-        if (parserContext != null) {
+        if (pipeline != null) {
             logger.info("Parser context created");
-            EventLoop eventLoop = EventLoop.getInstance(parserContext);
+            EventLoop eventLoop = EventLoop.getInstance(pipeline);
             Thread serverThread = new Thread(eventLoop);
             serverThread.start();
             serverThread.join();

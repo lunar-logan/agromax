@@ -1,6 +1,6 @@
 package org.agromax.util;
 
-import org.agromax.core.Word;
+import org.agromax.core.nlp.pipeline.ComparableWord;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -125,7 +125,7 @@ public class Util {
         return Paths.get(base, parts);
     }
 
-    public static String weld(Collection<Word> collection, String separator) {
+    public static String weld(Collection<ComparableWord> collection, String separator) {
         StringBuilder value = new StringBuilder();
         collection.stream().forEach(e -> {
             value.append(String.valueOf(e.getWord())).append(separator);

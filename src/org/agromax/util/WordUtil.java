@@ -17,7 +17,7 @@
 package org.agromax.util;
 
 import org.agromax.core.Stopwords;
-import org.agromax.core.Word;
+import org.agromax.core.nlp.pipeline.ComparableWord;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -30,11 +30,11 @@ import java.util.stream.Stream;
  * @author Anurag Gautam
  */
 public class WordUtil {
-    public static Stream<Word> filterStopwords(Stream<Word> words) {
+    public static Stream<ComparableWord> filterStopwords(Stream<ComparableWord> words) {
         return words.filter(w -> !Stopwords.STOPWORDS.contains(w.getWord()));
     }
 
-    public static Stream<Word> replaceWord(Stream<Word> words, String what, String with) {
+    public static Stream<ComparableWord> replaceWord(Stream<ComparableWord> words, String what, String with) {
         return words.map(w -> {
             if (w.getWord().equalsIgnoreCase(what) && !with.isEmpty()) {
                 System.out.println("Rep 'it' with " + with);
@@ -45,7 +45,7 @@ public class WordUtil {
     }
 
     @Deprecated
-    public static String weld(Stream<Word> collection, String separator) {
+    public static String weld(Stream<ComparableWord> collection, String separator) {
         StringBuilder value = new StringBuilder();
         collection.forEach(e -> {
             value.append(String.valueOf(e.getWord())).append(separator);
@@ -55,7 +55,7 @@ public class WordUtil {
     }
 
     @Deprecated
-    public static String weld(Collection<Word> collection, String separator) {
+    public static String weld(Collection<ComparableWord> collection, String separator) {
         StringBuilder value = new StringBuilder();
         collection.forEach(e -> {
             value.append(String.valueOf(e.getWord())).append(separator);
@@ -64,9 +64,9 @@ public class WordUtil {
         return value.toString().trim();
     }
 
-    public static String join(Stream<Word> stream, String separator, Function<String, String> decorator) {
-        Objects.requireNonNull(separator, "Word separator cannot be null");
-        Objects.requireNonNull(stream, "Word stream cannot be null");
+    public static String join(Stream<ComparableWord> stream, String separator, Function<String, String> decorator) {
+        Objects.requireNonNull(separator, "ComparableWord separator cannot be null");
+        Objects.requireNonNull(stream, "ComparableWord stream cannot be null");
 
         StringBuilder value = new StringBuilder();
         if (decorator != null) {
@@ -82,9 +82,9 @@ public class WordUtil {
         return value.toString().trim();
     }
 
-    public static String join(Stream<Word> stream, String separator) {
-        Objects.requireNonNull(separator, "Word separator cannot be null");
-        Objects.requireNonNull(stream, "Word stream cannot be null");
+    public static String join(Stream<ComparableWord> stream, String separator) {
+        Objects.requireNonNull(separator, "ComparableWord separator cannot be null");
+        Objects.requireNonNull(stream, "ComparableWord stream cannot be null");
 
         StringBuilder value = new StringBuilder();
         stream.forEach(e -> {

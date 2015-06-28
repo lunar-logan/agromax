@@ -14,27 +14,30 @@
  *    limitations under the License.
  */
 
-package org.agromax.core;
+package org.agromax.core.nlp.pipeline;
 
 import edu.stanford.nlp.ling.IndexedWord;
+import org.agromax.core.RDFGenerator;
 
 import java.util.Objects;
 
 /**
- * Represents an english word, used within <code>RDFGenerator</code> class.
+ * Represents an english word, used within <code>RDFGenerator</code> class only.
  * This class is closely knit with stanford-nlp library and uses (requires) <code>IndexedWord</code> class to run.
+ * Compares words based on there {@code index} in the original sentence.
  *
  * @author Deadpool
  * @version $revision$
  * @see RDFGenerator
+ * @see IndexedWord
  * @since Agromax 1.0
  */
-public class Word implements Comparable<Word> {
+public class ComparableWord implements Comparable<ComparableWord> {
     private String word;
     private final String posTag;
     private final int index;
 
-    public Word(IndexedWord indexedWord) {
+    public ComparableWord(IndexedWord indexedWord) {
         Objects.requireNonNull(indexedWord);
 
         word = indexedWord.word();
@@ -42,8 +45,12 @@ public class Word implements Comparable<Word> {
         index = indexedWord.index();
     }
 
-    public Word(String str, int index) {
-        Objects.requireNonNull(str, "word must not be null");
+    /**
+     * @param str   the english word
+     * @param index index (1-based) of {@code str} in the original sentence
+     */
+    public ComparableWord(String str, int index) {
+        Objects.requireNonNull(str, "ComparableWord must not be null");
 
         int slash = str.indexOf('/');
         if (slash >= 0) {
@@ -74,7 +81,7 @@ public class Word implements Comparable<Word> {
     }
 
     @Override
-    public int compareTo(Word o) {
+    public int compareTo(ComparableWord o) {
         if (o == null) throw new NullPointerException();
         return index < o.index ? -1 : (index > o.index ? 1 : 0);
     }
