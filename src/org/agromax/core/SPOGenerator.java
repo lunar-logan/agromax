@@ -53,6 +53,7 @@ public class SPOGenerator {
     private static List<List<Triple<String, String, String>>> triples = new LinkedList<>();
 
     public static List<TreeMap<ComparableWord, TreeSet<ComparableWord>>> getRelationshipGraph(SPPipeline pipeline, CharSequence text) {
+        graph.clear();
         pipeline.registerPipelineAction((taggedWords, dependency) -> {
             graph.add(getRelationshipGraph(dependency));
 //            logger.info("Generated relationship graph");
@@ -62,6 +63,7 @@ public class SPOGenerator {
     }
 
     public static List<List<Triple<String, String, String>>> generate(SPPipeline pipeline, CharSequence text) {
+        triples.clear();
 
         pipeline.registerPipelineAction((taggedWords, dependency) -> {
             TreeMap<ComparableWord, TreeSet<ComparableWord>> relationshipGraph = getRelationshipGraph(dependency);
@@ -250,7 +252,6 @@ public class SPOGenerator {
         DependencyParser parser = DependencyParser.loadFromModelFile(Util.SP_MODEL_PATH);
 
         SPPipeline pipeline = new SPPipeline(new StanfordParser(tagger, parser));
-
         generate(pipeline, ResourceManager.getInstance().get(Util.dirPath("data", "test.txt").toString()));
     }
 }

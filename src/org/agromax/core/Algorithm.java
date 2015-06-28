@@ -19,6 +19,7 @@ package org.agromax.core;
 import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.trees.TypedDependency;
 import org.agromax.core.nlp.pipeline.ComparableWord;
+import org.agromax.util.Util;
 import org.agromax.util.WordUtil;
 
 import java.util.*;
@@ -59,6 +60,8 @@ public class Algorithm {
         // Stores the probable SPO triples that are generated
         final List<Triple<String, String, String>> triples = new LinkedList<>();
 
+        Util.log("Got following relationship graph:\n", relationMap);
+
         // For each node of the relationship graph, we try to identify any triple(S-P-O triple) that could possibly be
         // generated
         for (ComparableWord u : relationMap.keySet()) {
@@ -72,11 +75,10 @@ public class Algorithm {
             // List of potential predicate words
             TreeSet<ComparableWord> predicatePhrase = new TreeSet<>();
 
-            boolean motionWordFound = false;
+            boolean verbFound = false;
 
             // Step #1: Traverse the adjacency list of node "u"
             for (ComparableWord v : relationMap.get(u)) {
-//            relationMap.get(u).stream().forEach(v -> {
                 queue.clear();
                 visited.clear();
 
@@ -89,9 +91,10 @@ public class Algorithm {
                         get into the subject phrase. Such words will become the predicate and following words become
                         the object of the sentence.
                  */
-                if (v.getIndex() < u.getIndex() && !motionWordFound) {
+                if (v.getIndex() < u.getIndex() && !verbFound) {
                     if (v.getTag().startsWith("VB")) {
-                        motionWordFound = true;
+                        predicatePhrase.add(v);
+                        verbFound = true;
                     } else {
                         queue.add(v);
                         // Expand the vertex to get any amod, ajcom relations dependent
@@ -110,7 +113,7 @@ public class Algorithm {
                         }
                     }
 
-                } else if (motionWordFound && v.getTag().startsWith("VB")) {
+                } else if (verbFound && v.getTag().startsWith("VB")) {
                     predicatePhrase.add(v);
                 } else {
                     // Get the object
@@ -132,7 +135,6 @@ public class Algorithm {
             }
 
 
-
             // Only if are able to identify at least one object and atleast one subject phrase
             // we consider the triple for output
             if (subjectPhrase.size() > 0 && objectPhrase.size() > 0) {
@@ -144,6 +146,8 @@ public class Algorithm {
                     } else {
                         subjectPhrase.add(u);
                     }
+                }else {
+                    predicatePhrase.add(u);
                 }
 
                 /* Co-reference resolution phase
@@ -193,7 +197,7 @@ public class Algorithm {
                         return w;
                     return w;
                 });
-                String predicate = u.getWord();
+                String predicate = Util.weld(predicatePhrase, " ");//u.getWord();
 //                System.out.println(object + " -- " + predicate);
 
                 potentialSubjectPhrases.forEach(subjPhrase -> {
