@@ -36,23 +36,6 @@ import java.util.stream.Stream;
  */
 public class TripleGenerator {
 
-    public static class Triple<P, Q, R> {
-        public final P first;
-        public final Q second;
-        public final R third;
-
-        public Triple(P first, Q second, R third) {
-            this.first = first;
-            this.second = second;
-            this.third = third;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("(%s, %s, %s)", String.valueOf(first), String.valueOf(second), String.valueOf(third));
-        }
-    }
-
     private static String lastSubjectPhrase = "";
 
     public static List<Triple<String, String, String>> getTriples(String text) {
