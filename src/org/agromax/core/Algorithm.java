@@ -32,11 +32,11 @@ import java.util.*;
  * @version 1.0
  * @since 1.2
  */
-public class Maya {
+public class Algorithm {
     /**
      * Suppress instantiation of this class
      */
-    private Maya() {
+    private Algorithm() {
     }
 
     private static final TreeSet<ComparableWord> lastSubjectPhrase = new TreeSet<>();

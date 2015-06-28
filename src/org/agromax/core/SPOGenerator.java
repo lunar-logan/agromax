@@ -66,7 +66,7 @@ public class SPOGenerator {
         pipeline.registerPipelineAction((taggedWords, dependency) -> {
             TreeMap<ComparableWord, TreeSet<ComparableWord>> relationshipGraph = getRelationshipGraph(dependency);
 //            logger.info("Generated relationship graph");
-            triples.add(Maya.getTriples(dependency, taggedWords, relationshipGraph));
+            triples.add(Algorithm.getTriples(dependency, taggedWords, relationshipGraph));
 //            logger.info(triples.size() + " triples generated");
 //            triples.forEach(System.out::println);
 
