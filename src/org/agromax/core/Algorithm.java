@@ -25,12 +25,14 @@ import org.agromax.util.WordUtil;
 import java.util.*;
 
 /**
- * This is the core algorithm that identifies Subject-Predicate-Objects from an English sentence and
- * generates RDF triples.
+ * This is the core algorithm that identifies Subject-Predicate-Objects from an English sentence. This class
+ * <b>does not</b> generates RDF triples. Instead it simply returns a list of SPO triples. Use {@code RDFGenerator} class to
+ * generate actual RDF triples.
  *
  * @author Anurag Gautam
  * @author Maya Gautam
  * @version 1.0
+ * @see RDFGenerator
  * @since 1.2
  */
 public class Algorithm {
@@ -45,8 +47,8 @@ public class Algorithm {
     /**
      * Generates all the subject-predicate-objects triples possible from a sentence.
      *
-     * @param dependencies
-     * @param taggedWords
+     * @param dependencies Stanford dependency structure
+     * @param taggedWords List of POS tagged words returned by Stanford parser
      * @param relationMap  relationship graph
      */
     public static List<Triple<String, String, String>> getTriples(Collection<TypedDependency> dependencies,
@@ -146,7 +148,7 @@ public class Algorithm {
                     } else {
                         subjectPhrase.add(u);
                     }
-                }else {
+                } else {
                     predicatePhrase.add(u);
                 }
 
