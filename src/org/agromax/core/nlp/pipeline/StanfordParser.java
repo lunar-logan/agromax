@@ -32,15 +32,22 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Represents a stanford parser context, basically a wrapper around
- * stanford parser API. All SP methods must be invoked using this class.
- * This class is thread safe.
+ * This class is a lightweight wrapper around Stanford parser API.
+ * All API methods <b>must</b> be invoked using this class.<br>
+ * I've tried to make this class as immutable as possible. And I <i>believe</i> that
+ * this class is thread safe.(But still keep an eagle eye)
+ * This class is singleton.
  *
  * @author Anurag Gautam
+ * @version $revision 4, Date: 24/7/2015 $
  */
 public class StanfordParser extends AbstractParser {
+    // The maximum entropy tagger as provided by the Stanford core NLP API
     private final MaxentTagger tagger;
+
+    // Dependency parser as provided in the Stanford parser API
     private final DependencyParser dependencyParser;
+
     private final Object mutexLock = new Object();
 
     public StanfordParser(MaxentTagger tagger, DependencyParser dependencyParser) {
