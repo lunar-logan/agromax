@@ -23,6 +23,7 @@ import java.util.Collection;
 /**
  * @author Anurag Gautam
  */
+@Deprecated
 public abstract class AbstractParser implements LanguageParser {
 
     /**

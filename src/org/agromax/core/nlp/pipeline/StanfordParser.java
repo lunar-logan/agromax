@@ -23,6 +23,7 @@ import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.trees.GrammaticalStructure;
 import edu.stanford.nlp.trees.TypedDependency;
+import org.agromax.util.AgromaxConstants;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.StringReader;
@@ -36,12 +37,15 @@ import java.util.Objects;
  * All API methods <b>must</b> be invoked using this class.<br>
  * I've tried to make this class as immutable as possible. And I <i>believe</i> that
  * this class is thread safe.(But still keep an eagle eye)
- * This class is singleton.
+ * This class is singleton.<br>
+ * Many of the methods have been marked as <code>deprecated</code> and they will be removed in
+ * not so far future.
  *
  * @author Anurag Gautam
  * @version $revision 4, Date: 24/7/2015 $
  */
-public class StanfordParser extends AbstractParser {
+public class StanfordParser {
+
     // The maximum entropy tagger as provided by the Stanford core NLP API
     private final MaxentTagger tagger;
 
@@ -50,6 +54,25 @@ public class StanfordParser extends AbstractParser {
 
     private final Object mutexLock = new Object();
 
+    private static StanfordParser ourInstance = null; // new StanfordParser();
+
+    public static StanfordParser getInstance() {
+        if (ourInstance == null) {
+            ourInstance = new StanfordParser();
+        }
+        return ourInstance;
+    }
+
+    /**
+     * Suppress instantiation, greater good theory
+     */
+    private StanfordParser() {
+        tagger = new MaxentTagger(AgromaxConstants.SP_TAGGER_PATH);
+        dependencyParser = DependencyParser.loadFromModelFile(AgromaxConstants.SP_MODEL_PATH);
+    }
+
+
+    @Deprecated
     public StanfordParser(MaxentTagger tagger, DependencyParser dependencyParser) {
         Objects.requireNonNull(tagger);
         Objects.requireNonNull(dependencyParser);
@@ -58,18 +81,13 @@ public class StanfordParser extends AbstractParser {
         this.dependencyParser = dependencyParser;
     }
 
-    @Override
-    public List<TaggedWord> tagSentence(Collection<?> words) {
+    @SuppressWarnings("unchecked")
+    public Collection<? extends TaggedWord> tagSentence(Collection<? extends HasWord> words) {
         Objects.requireNonNull(words);
-
-        synchronized (mutexLock) {
-            List<TaggedWord> taggedWords = tagger.tagSentence((List<HasWord>) words);
-            mutexLock.notify();
-            return taggedWords;
-        }
+        return tagger.tagSentence((List<HasWord>) words);
     }
 
-    @Override
+    @Deprecated
     public List<List<HasWord>> sentenceTokenize(CharSequence text) {
         List<List<HasWord>> sentences = new ArrayList<>();
         DocumentPreprocessor tokenizer = new DocumentPreprocessor(new StringReader(text.toString()));
@@ -82,32 +100,53 @@ public class StanfordParser extends AbstractParser {
         return sentences;
     }
 
-    @Override
+    public List<List<HasWord>> toSentences(CharSequence text) {
+        List<List<HasWord>> sentences = new ArrayList<>();
+        DocumentPreprocessor tokenizer = new DocumentPreprocessor(new StringReader(text.toString()));
+        for (List<HasWord> sentence : tokenizer) {
+            sentences.add(sentence);
+        }
+        return sentences;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Deprecated
     public Collection<TypedDependency> sentenceDependencies(CharSequence sent) {
         GrammaticalStructure gs = null;
-        synchronized (mutexLock) {
-            List<TaggedWord> taggedWords = tagSentence(wordTokenize(sent));
-            gs = dependencyParser.predict(taggedWords);
-            mutexLock.notify();
-        }
-        assert gs != null;
+        List<TaggedWord> taggedWords = (List<TaggedWord>) tagSentence(wordTokenize(sent));
+        gs = dependencyParser.predict(taggedWords);
+        if (gs == null)
+            throw new RuntimeException("Grammatical structure so generated is null");
         return gs.typedDependencies();
     }
 
-    @Override
-    public Collection<TypedDependency> sentenceDependencies(Collection<?> words) {
-        GrammaticalStructure gs = null;
-        synchronized (mutexLock) {
-//            List<TaggedWord> taggedWords = tagSentence(wordTokenize(sent));
-            gs = dependencyParser.predict((List<? extends TaggedWord>) words);
-            mutexLock.notify();
-        }
-        assert gs != null;
+//    @Deprecated
+//    @SuppressWarnings("unchecked")
+//    public Collection<TypedDependency> sentenceDependencies(Collection<?> words) {
+//        GrammaticalStructure gs = null;
+//        synchronized (mutexLock) {
+////            List<TaggedWord> taggedWords = tagSentence(wordTokenize(sent));
+//            gs = dependencyParser.predict((List<? extends TaggedWord>) words);
+//            mutexLock.notify();
+//        }
+//        assert gs != null;
+//        return gs.typedDependencies();
+//    }
+
+    @SuppressWarnings("unchecked")
+    public Collection<TypedDependency> sentenceDependencies(Collection<? extends TaggedWord> words) {
+        GrammaticalStructure gs = dependencyParser.predict((List<? extends TaggedWord>) words);
+        if (gs == null)
+            throw new RuntimeException("Grammatical structure so generated is null");
         return gs.typedDependencies();
     }
 
-    @Override
-    public Collection<?> wordTokenize(CharSequence sent) {
+    @Deprecated
+    public Collection<? extends HasWord> wordTokenize(CharSequence sent) {
+        throw new NotImplementedException();
+    }
+
+    public Collection<? extends HasWord> toWords(CharSequence sent) {
         throw new NotImplementedException();
     }
 

@@ -25,6 +25,7 @@ import java.util.Collection;
  * @author Anurag Gautam
  * @since 1.2
  */
+@Deprecated
 public interface LanguageParser {
     Collection<?> tagSentence(Collection<?> words);
 
