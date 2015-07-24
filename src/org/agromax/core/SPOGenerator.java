@@ -32,9 +32,9 @@ import java.util.*;
 import java.util.logging.Logger;
 
 /**
- * Generates Subject, Predicate and Object triples
+ * Generates Subject, Predicate and Object triples from the given text
  *
- * @author Anurag Gautam
+ * @author GarunA
  */
 public class SPOGenerator {
 
@@ -48,13 +48,14 @@ public class SPOGenerator {
 
     private static final TreeSet<ComparableWord> lastSubjectPhrase = new TreeSet<>();
 
-
+    // List of connected components of the graph
     private static List<TreeMap<ComparableWord, TreeSet<ComparableWord>>> graph = new LinkedList<>();
+
     private static List<List<Triple<String, String, String>>> triples = new LinkedList<>();
 
     public static List<TreeMap<ComparableWord, TreeSet<ComparableWord>>> getRelationshipGraph(SPPipeline pipeline, CharSequence text) {
         graph.clear();
-        pipeline.registerPipelineAction((taggedWords, dependency) -> {
+        pipeline.addPipelineAction((taggedWords, dependency) -> {
             graph.add(getRelationshipGraph(dependency));
 //            logger.info("Generated relationship graph");
         });
@@ -86,7 +87,9 @@ public class SPOGenerator {
      * <li>Traverse its adjacency list</li>
      * <li>Identify any potential subject and object phrase available</li>
      * </ul>
+     * <h1>This method must NOT be used anymore, use <code>Algorithm</code> class instead</h1>
      */
+    @Deprecated
     private static List<Triple<String, String, String>> getTriples(Collection<TypedDependency> dependencies,
                                                                    List<TaggedWord> taggedWords,
                                                                    TreeMap<ComparableWord, TreeSet<ComparableWord>> relationMap) {
@@ -233,8 +236,8 @@ public class SPOGenerator {
     private static TreeMap<ComparableWord, TreeSet<ComparableWord>> getRelationshipGraph(Collection<TypedDependency> dependencies) {
         TreeMap<ComparableWord, TreeSet<ComparableWord>> relations = new TreeMap<>();
         for (TypedDependency d : dependencies) {
-            ComparableWord gov = new ComparableWord(d.gov());
-            ComparableWord dep = new ComparableWord(d.dep());
+            ComparableWord gov = new ComparableWord(d.gov()); // governor
+            ComparableWord dep = new ComparableWord(d.dep()); // dependent
 
             if (relations.containsKey(gov)) {
                 relations.get(gov).add(dep);

@@ -48,11 +48,11 @@ public class Algorithm {
      * Generates all the subject-predicate-objects triples possible from a sentence.
      *
      * @param dependencies Stanford dependency structure
-     * @param taggedWords List of POS tagged words returned by Stanford parser
+     * @param taggedWords  List of POS tagged words returned by Stanford parser
      * @param relationMap  relationship graph
      */
     public static List<Triple<String, String, String>> getTriples(Collection<TypedDependency> dependencies,
-                                                                  Collection<TaggedWord> taggedWords,
+                                                                  Collection<? extends TaggedWord> taggedWords,
                                                                   TreeMap<ComparableWord, TreeSet<ComparableWord>> relationMap) {
         final Queue<ComparableWord> queue = new LinkedList<>();
 

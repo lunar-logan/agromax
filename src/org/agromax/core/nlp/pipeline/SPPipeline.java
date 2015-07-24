@@ -27,6 +27,7 @@ import java.util.Queue;
 
 /**
  * @author Anurag Gautam
+ * @version revision 2 on: 25/7/2015
  */
 public class SPPipeline {
     private final StanfordParser parser;
