@@ -20,11 +20,11 @@ import edu.stanford.nlp.ling.TaggedWord;
 import edu.stanford.nlp.trees.TypedDependency;
 
 import java.util.Collection;
-import java.util.List;
 
 /**
  * @author Anurag Gautam
+ * @version $revision 2, date: 25/7/2015 $
  */
 public interface SPPipelineAction {
-    void perform(List<TaggedWord> taggedWords, Collection<TypedDependency> dependency);
+    void perform(Collection<? extends TaggedWord> taggedWords, Collection<TypedDependency> dependency);
 }

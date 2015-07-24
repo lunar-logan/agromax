@@ -18,10 +18,8 @@ package org.agromax.core.nlp.pipeline;
 
 import edu.stanford.nlp.ling.HasWord;
 import edu.stanford.nlp.ling.TaggedWord;
-import edu.stanford.nlp.process.DocumentPreprocessor;
 import edu.stanford.nlp.trees.TypedDependency;
 
-import java.io.StringReader;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -38,26 +36,40 @@ public class SPPipeline {
         this.parser = parser;
     }
 
+    @Deprecated
     public void registerPipelineAction(SPPipelineAction action) {
         actionList.add(action);
     }
 
-    public synchronized void schedule(CharSequence seq) {
-        String text = seq.toString();
+    public void addPipelineAction(SPPipelineAction action) {
+        actionList.add(action);
+    }
 
-        DocumentPreprocessor tokenizer = new DocumentPreprocessor(new StringReader(text));
+    public SPPipelineAction removePipelineAction(SPPipelineAction action) {
+        if (actionList.remove(action)) {
+            return action;
+        }
+        return null;
+    }
+
+    /**
+     * Schedule the text on the pipeline
+     *
+     * @param seq represents the text (sequence of characters) to be scheduled
+     */
+    public synchronized void schedule(CharSequence seq) {
 
         // Tokenize the text to sentences
-        List<List<HasWord>> sentences = parser.sentenceTokenize(seq);
+        List<List<HasWord>> sentences = parser.toSentences(seq);
 
         // For each sentence tag and process
-        for (List<HasWord> sentence : sentences) {
-            List<TaggedWord> taggedWords = parser.tagSentence(sentence);
+        sentences.forEach(sentence -> {
+            Collection<? extends TaggedWord> taggedWords = parser.tagSentence(sentence);
             Collection<TypedDependency> typedDependencies = parser.sentenceDependencies(taggedWords);
             actionList.forEach(a -> {
                 a.perform(taggedWords, typedDependencies);
             });
-        }
+        });
     }
 /*
     public static void main(String[] args) {

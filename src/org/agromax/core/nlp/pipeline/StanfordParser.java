@@ -81,6 +81,13 @@ public class StanfordParser {
         this.dependencyParser = dependencyParser;
     }
 
+    /**
+     * Tags a single sentence
+     *
+     * @param words a sentence represented as a list of words(of subtype HasWord)
+     * @return
+     * @see HasWord
+     */
     @SuppressWarnings("unchecked")
     public Collection<? extends TaggedWord> tagSentence(Collection<? extends HasWord> words) {
         Objects.requireNonNull(words);
