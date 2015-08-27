@@ -17,8 +17,6 @@
 package org.agromax.core;
 
 import edu.stanford.nlp.ling.TaggedWord;
-import edu.stanford.nlp.parser.nndep.DependencyParser;
-import edu.stanford.nlp.tagger.maxent.MaxentTagger;
 import edu.stanford.nlp.trees.TypedDependency;
 import org.agromax.ResourceManager;
 import org.agromax.core.nlp.pipeline.ComparableWord;
@@ -63,13 +61,20 @@ public class SPOGenerator {
         return graph;
     }
 
+    /**
+     * Generates subject, predicate and object triples
+     *
+     * @param pipeline
+     * @param text
+     * @return
+     */
     public static List<List<Triple<String, String, String>>> generate(SPPipeline pipeline, CharSequence text) {
         triples.clear();
 
         pipeline.registerPipelineAction((taggedWords, dependency) -> {
             TreeMap<ComparableWord, TreeSet<ComparableWord>> relationshipGraph = getRelationshipGraph(dependency);
 //            logger.info("Generated relationship graph");
-            triples.add(Algorithm.getTriples(dependency, taggedWords, relationshipGraph));
+            triples.add(Algorithm.getTriples(dependency, taggedWords, relationshipGraph, false));
 //            logger.info(triples.size() + " triples generated");
 //            triples.forEach(System.out::println);
 
@@ -251,10 +256,11 @@ public class SPOGenerator {
     }
 
     public static void main(String[] args) throws URISyntaxException {
-        MaxentTagger tagger = new MaxentTagger(Util.SP_TAGGER_PATH);
-        DependencyParser parser = DependencyParser.loadFromModelFile(Util.SP_MODEL_PATH);
+        StanfordParser parser1 = StanfordParser.getInstance();
+        SPPipeline pipeline = new SPPipeline(parser1);
 
-        SPPipeline pipeline = new SPPipeline(new StanfordParser(tagger, parser));
-        generate(pipeline, ResourceManager.getInstance().get(Util.dirPath("data", "test.txt").toString()));
+        List<List<Triple<String, String, String>>> data =
+                generate(pipeline, ResourceManager.getInstance().get(Util.dirPath("data", "test.txt").toString()));
+        data.forEach(System.out::println);
     }
 }

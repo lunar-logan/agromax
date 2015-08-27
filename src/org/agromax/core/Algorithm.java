@@ -31,7 +31,7 @@ import java.util.*;
  *
  * @author Anurag Gautam
  * @author Maya Gautam
- * @version 1.0
+ * @version 1.2 revision on: 25/7/2015
  * @see RDFGenerator
  * @since 1.2
  */
@@ -43,6 +43,137 @@ public class Algorithm {
     }
 
     private static final TreeSet<ComparableWord> lastSubjectPhrase = new TreeSet<>();
+
+    public static List<Triple<String, String, String>> getTriples(Collection<TypedDependency> dependencies,
+                                                                  Collection<? extends TaggedWord> taggedWords,
+                                                                  TreeMap<ComparableWord, TreeSet<ComparableWord>> relationMap,
+                                                                  boolean doAnaphora) {
+        System.out.println(taggedWords);
+        if (doAnaphora) {
+            return getTriples(dependencies, taggedWords, relationMap);
+        }
+        return getTriplesWithoutAnaphora(dependencies, taggedWords, relationMap);
+
+    }
+
+    private static List<Triple<String, String, String>>
+    getTriplesWithoutAnaphora(Collection<TypedDependency> dependencies,
+                              Collection<? extends TaggedWord> taggedWords,
+                              TreeMap<ComparableWord, TreeSet<ComparableWord>> relationMap) {
+
+        // TODO explain its use case?
+        final Queue<ComparableWord> queue = new LinkedList<>();
+
+        // Stores the list of visited nodes of the graph
+        final TreeSet<ComparableWord> visited = new TreeSet<>();
+
+        // Stores the SPO triples that gets generated
+        final List<Triple<String, String, String>> triples = new LinkedList<>();
+
+//        Util.log("Got following relationship graph:\n", relationMap);
+
+        // For each node of the relationship graph, we try to identify any triple(S-P-O triple) that could possibly be
+        // generated
+        for (ComparableWord u : relationMap.keySet()) {
+            // Will store the subject phrase, that could contain many words
+            TreeSet<ComparableWord> subjectPhrase = new TreeSet<>();
+
+            // Will store object phrase, this could also contain many words, will weld them
+            // in the end
+            TreeSet<ComparableWord> objectPhrase = new TreeSet<>();
+
+            // List of potential predicate words
+            TreeSet<ComparableWord> predicatePhrase = new TreeSet<>();
+
+            boolean verbFound = false;
+
+            // Step #1: Traverse the adjacency list of node "u"
+            for (ComparableWord v : relationMap.get(u)) {
+                queue.clear();
+                visited.clear();
+
+                /*
+                Get the subject:
+                    #1: Find all the words in the adj. list whose index < index of "u" in the original sentence
+                    #2: Think of them as words. But it has a catch. Node "u" might not be a predicate. In fact it could
+                        be an NNX type word.
+                        In this case, we keep a track on the tag of the word. And won't allow and VBX type words to
+                        get into the subject phrase. Such words will become the predicate and following words become
+                        the object of the sentence.
+                 */
+                if (v.getIndex() < u.getIndex() && !verbFound) {
+                    if (v.getTag().startsWith("VB")) {
+                        predicatePhrase.add(v);
+                        verbFound = true;
+                    } else {
+                        queue.add(v);
+                        // Expand the vertex to get any amod, ajcom relations dependent
+                        while (!queue.isEmpty()) {
+                            ComparableWord w = queue.poll();
+                            subjectPhrase.add(w);
+                            if (!visited.contains(w)) {
+                                if (relationMap.containsKey(w)) {
+                                    for (ComparableWord x : relationMap.get(w)) {
+                                        subjectPhrase.add(x);
+                                        queue.add(x);
+                                    }
+                                }
+                                visited.add(w);
+                            }
+                        }
+                    }
+
+                } else if (verbFound && v.getTag().startsWith("VB")) {
+                    predicatePhrase.add(v);
+                } else {
+                    // Get the object
+                    queue.add(v);
+                    while (!queue.isEmpty()) {
+                        ComparableWord w = queue.poll();
+                        objectPhrase.add(w);
+                        if (!visited.contains(w)) {
+                            if (relationMap.containsKey(w)) {
+                                for (ComparableWord x : relationMap.get(w)) {
+                                    objectPhrase.add(x);
+                                    queue.add(x);
+                                }
+                            }
+                            visited.add(w);
+                        }
+                    }
+                }
+            }
+
+
+            // Only if are able to identify at least one object and atleast one subject phrase
+            // we consider the triple for output
+            if (subjectPhrase.size() > 0 && objectPhrase.size() > 0) {
+
+                // Test
+                // TODO explain this piece of code?
+                if (!predicatePhrase.isEmpty()) {
+                    if (u.getIndex() > subjectPhrase.last().getIndex()) {
+                        objectPhrase.add(u);
+                    } else {
+                        subjectPhrase.add(u);
+                    }
+                } else {
+                    predicatePhrase.add(u);
+                }
+
+
+                String object = WordUtil.join(objectPhrase.stream(), " ", w -> {
+                    if (!Stopwords.STOPWORDS.contains(w.toLowerCase()))
+                        return w;
+                    return w;
+                });
+                String predicate = Util.weld(predicatePhrase, " ");//u.getWord();
+                String subject = Util.weld(subjectPhrase, " ");
+                triples.add(new Triple<>(subject, predicate, object));
+            }
+        }
+        return triples;
+    }
 
     /**
      * Generates all the subject-predicate-objects triples possible from a sentence.
