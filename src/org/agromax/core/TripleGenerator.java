@@ -27,6 +27,7 @@ import org.agromax.core.nlp.pipeline.ComparableWord;
 import org.agromax.util.Util;
 import org.agromax.util.WordUtil;
 
+import java.io.StreamTokenizer;
 import java.io.StringReader;
 import java.util.*;
 import java.util.stream.Stream;
@@ -77,7 +78,6 @@ public class TripleGenerator {
             System.out.println(triples);
             allTriples.addAll(triples);
         }
-
 
         return allTriples;
     }

@@ -49,6 +49,7 @@ import static org.agromax.util.WordUtil.weld;
 /**
  * This class, as named, generates RDF triples from a sentence.
  * For better results <b>electrocute</b> your brain weekly.
+ * Update: 25/10/2015 : I'm reworking this class
  *
  * @deprecated
  * @author Harley Quinn

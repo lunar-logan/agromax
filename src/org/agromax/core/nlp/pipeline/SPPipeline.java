@@ -26,6 +26,10 @@ import java.util.List;
 import java.util.Queue;
 
 /**
+ * Abstracts an NLP pipeline. Any action can be scheduled on the pipeline. All
+ * these actions are stored in a queue and they are run one by one. This pipeline was not designed
+ * by keeping multithreading in mind. So, be wary while using in concurrent systems.
+ *
  * @author Anurag Gautam
  * @version revision 2 on: 25/7/2015
  */

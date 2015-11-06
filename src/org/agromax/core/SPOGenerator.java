@@ -25,6 +25,7 @@ import org.agromax.core.nlp.pipeline.StanfordParser;
 import org.agromax.util.Util;
 import org.agromax.util.WordUtil;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.logging.Logger;
@@ -255,12 +256,18 @@ public class SPOGenerator {
         return relations;
     }
 
-    public static void main(String[] args) throws URISyntaxException {
+    public static void main(String[] args) throws URISyntaxException, IOException {
         StanfordParser parser1 = StanfordParser.getInstance();
         SPPipeline pipeline = new SPPipeline(parser1);
 
         List<List<Triple<String, String, String>>> data =
-                generate(pipeline, ResourceManager.getInstance().get(Util.dirPath("data", "test.txt").toString()));
-        data.forEach(System.out::println);
+                generate(pipeline, ResourceManager.getInstance().get(Util.dirPath("data", "test0.txt").toString()));
+
+        List<Triple<String, String, String>> allTriples = new LinkedList<>();
+        data.forEach(allTriples::addAll);
+        RDFUtil.dumpAsRDF(allTriples);
+//        String publish = TripleGenerator.publish(allTriples);
+//        FileUtil.write(publish, Util.dirPath("data", "output0.html"));
+//        data.forEach(System.out::println);
     }
 }

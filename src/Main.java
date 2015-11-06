@@ -1,12 +1,11 @@
-import edu.stanford.nlp.parser.nndep.DependencyParser;
-import edu.stanford.nlp.tagger.maxent.MaxentTagger;
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
+import com.hp.hpl.jena.rdf.model.Property;
+import com.hp.hpl.jena.rdf.model.Resource;
 import org.agromax.core.nlp.pipeline.SPPipeline;
-import org.agromax.core.nlp.pipeline.StanfordParser;
-import org.agromax.platform.bootloader.*;
-import org.agromax.platform.server.CmdHost;
-import org.agromax.util.Util;
 
 import java.net.URISyntaxException;
+import java.util.StringTokenizer;
 import java.util.logging.Logger;
 
 /**
@@ -21,27 +20,29 @@ public class Main {
 
     public static void main(String[] args) throws URISyntaxException, InterruptedException {
 
-//        logger.info("Creating a default model, using ModelFactory");
-//        Model model = ModelFactory.createDefaultModel();
-//
-//        logger.info("Creating a new resource Anurag");
-//        Resource Anurag = model.createResource("http://agromax.org/Person+We+Me");
-//        logger.info("Resource " + Anurag + " has been created");
-//
-//        logger.info("Creating a property named \"fullName\"");
-//        Property fullName = model.createProperty("http://anurag.me/FullName");
-//
-//        logger.info("Adding property \"fullName\" to the resource \"Anurag\"");
-//        Anurag.addProperty(fullName, "Anurag Gautam is a good boy");
-//
-//        logger.info("Writing model in RDF on the stdout");
-//        model.write(System.out);
-//
-//
+        logger.info("Creating a default model, using ModelFactory");
+        Model model = ModelFactory.createDefaultModel();
+
+        logger.info("Creating a new resource Anurag");
+        Resource Anurag = model.createResource("http://agromax.org/Person+We+Me");
+        logger.info("Resource " + Anurag + " has been created");
+
+        logger.info("Creating a property named \"fullName\"");
+        Property fullName = model.createProperty("http://anurag.me/FullName");
+
+        logger.info("Adding property \"fullName\" to the resource \"Anurag\"");
+        Anurag.addProperty(fullName, "Anurag Gautam is a good boy");
+        Property age = model.createProperty("http://g/Age");
+        Anurag.addProperty(age, "24");
+
+        logger.info("Writing model in RDF on the stdout");
+        model.write(System.out);
+
+
 //        ResourceManager rm = ResourceManager.getInstance();
 //        AgroMax.getTriples(rm.get(System.getProperty("user.dir") + "/data/test.txt"));
 //            System.out.println(VocabLoader.loadAll());
-
+/*
         Bootloader bootloader = new Bootloader();
 
         // Add action to load stanford parser
@@ -77,6 +78,10 @@ public class Main {
         } else {
             logger.severe("Parser context could not be created");
         }
+*/
+
+
+
 
     }
 }

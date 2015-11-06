@@ -56,6 +56,14 @@ public class Algorithm {
 
     }
 
+    /**
+     * Tries to identify the SPO triples without considering anaphora resolution
+     *
+     * @param dependencies
+     * @param taggedWords
+     * @param relationMap  the relationship graph of the sentence
+     * @return
+     */
     private static List<Triple<String, String, String>>
     getTriplesWithoutAnaphora(Collection<TypedDependency> dependencies,
                               Collection<? extends TaggedWord> taggedWords,
@@ -70,7 +78,7 @@ public class Algorithm {
         // Stores the SPO triples that gets generated
         final List<Triple<String, String, String>> triples = new LinkedList<>();
 
-//        Util.log("Got following relationship graph:\n", relationMap);
+        Util.log("Got following relationship graph:\n", relationMap);
 
         // For each node of the relationship graph, we try to identify any triple(S-P-O triple) that could possibly be
         // generated
@@ -84,6 +92,7 @@ public class Algorithm {
 
             // List of potential predicate words
             TreeSet<ComparableWord> predicatePhrase = new TreeSet<>();
+            predicatePhrase.add(u);
 
             boolean verbFound = false;
 

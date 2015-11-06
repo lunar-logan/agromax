@@ -23,7 +23,7 @@ import java.util.Objects;
 
 /**
  * Represents an english word, used within <code>RDFGenerator</code> class only.
- * This class is closely knit with stanford-nlp library and uses (requires) <code>IndexedWord</code> class to run.
+ * This class is closely knit with stanford-nlp library and requires <code>IndexedWord</code> class to run.
  * Compares words based on there {@code index} in the original sentence.
  *
  * @author Deadpool
